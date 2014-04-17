@@ -1,0 +1,15 @@
+{
+  "name": "amd-optimize",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marius Gundersen",
+  "license": "ISC",
+  "dependencies": {
+    "recast": "^0.5.16",
+    "requirejs": "^2.1.11"
+  }
+}
