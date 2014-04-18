@@ -1,7 +1,7 @@
 
 function getLiterals(arrayExpression){
   return arrayExpression.elements.filter(function(element){
-    return element.type = 'Literal';
+    return element.type == 'Literal';
   }).map(function(element){
     return element.value;
   });
