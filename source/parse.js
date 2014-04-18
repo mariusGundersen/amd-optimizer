@@ -3,13 +3,8 @@ var recast = require('recast');
 
 module.exports = function(file){
   
-  var ast = recast.parse(file.source);
+  var ast = recast.parse(file.source, { sourceFileName: file.path });
   
-  return {
-    name: file.name,
-    path: file.path,
-    ast: ast,
-    source: file.source
-  };
+  return ast;
   
 };

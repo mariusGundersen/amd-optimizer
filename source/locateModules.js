@@ -20,18 +20,15 @@ function findCallExpression(node){
 }
 
 
-module.exports = function(file){
+module.exports = function(ast){
   
-  var topLevel = file.ast.program.body;
-  
-  
-  file.modules = topLevel.filter(function(node){
+  var topLevel = ast.program.body;
+    
+  return topLevel.filter(function(node){
         
     return isDefineNodeWithArgs(node.expression) || isRequireNodeWithArgs(node.expression);
     
     
   });
-  
-  return file;
   
 };

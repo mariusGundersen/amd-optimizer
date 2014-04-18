@@ -1,5 +1,5 @@
 var recast = require('recast');
 
-module.exports = function(module){
-  return recast.print(module);
+module.exports = function(module, name){
+  return recast.print(module, {sourceMapName: name});
 };

@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "recast": "^0.5.16",
-    "requirejs": "^2.1.11"
+    "requirejs": "^2.1.11",
+    "toposort": "^0.2.10"
   }
 }
