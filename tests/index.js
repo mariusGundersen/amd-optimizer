@@ -1,24 +1,28 @@
 var fs = require('fs');
 var optimize = require('../index.js');
 
-var file = {
-  name: "test",
-  source: "define(['a'], function(a){return function(b){ return a(b, 2); }; })",
-  path: __dirname+"/test.js"
-};
+function loadFile(path, name){
+  return {
+    name: name,
+    path: path,
+    source: fs.readFileSync(path)
+  };
+}
 
-var optimizer = optimize({});
+var file = loadFile(__dirname+"/modules/test.js", "test");
+
+var optimizer = optimize({
+  baseUrl: 'modules'
+});
 
 optimizer.on('dependency', function(dependency){
-  optimizer.addFile({
-    name: dependency.name,
-    source: "define(function(){return function(a, b){ return a+b; }; })",
-    path: dependency.url
-  })
+  optimizer.addFile(loadFile(dependency.url, dependency.name))
 });
 
 optimizer.addFile(file);
 
 var output = optimizer.optimize();
 
-console.log(output);
+console.log(output.reduce(function(code, module){
+  return code + "\n" + module.code;
+}, ""));
