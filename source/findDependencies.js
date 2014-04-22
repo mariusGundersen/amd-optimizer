@@ -14,7 +14,9 @@ module.exports = function(module){
   }else if(module.arguments.length == 2){
     if(module.arguments[0].type == 'ArrayExpression'){
       return getLiterals(module.arguments[0])
-    } 
+    }else if(module.arguments[0].type == 'Literal'){
+      return [];
+    }
   }else if(module.arguments.length == 3){
     if(module.arguments[1].type == 'ArrayExpression'){
       return getLiterals(module.arguments[1])

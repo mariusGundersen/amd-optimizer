@@ -30,6 +30,17 @@ module.exports = function(config){
   
   return extend({
     addFile: function(file){
+      
+      if('source' in file == false){
+        eventEmitter.emit('error', 'File object must contain source');
+        return;
+      }
+      if('path' in file == false){
+        eventEmitter.emit('error', 'File object must contain property path');
+        return;
+      }
+      
+      
       locateModules(parse(file)).map(function(module){
         var dependencies = findDependencies(module.expression).map(function(name){
           var url = context.toUrl(name + '.js');
@@ -48,13 +59,17 @@ module.exports = function(config){
         nameAnonymousModule(module.expression, file.name);
         
         var name = module.expression.arguments[0].value;
-
+        
         modules.defineModule(name, print(module, name), dependencies.map(function(dep){ return dep.name; }), file);
       });
     },
     optimize: function(){
       return modules.leafToRoot().map(function(module){
-        return module.source;
+        return {
+          code: module.source.code,
+          map: module.source.map,
+          name: module.name
+        };
       });
     }
     

@@ -32,17 +32,21 @@ module.exports = function(){
       return (name in modules) && modules[name].defined; 
     },
     
-    leafToRoot: function(){      
+    leafToRoot: function(){
       var edges = [];
+      var nodes = [];
+      
       for(var name in modules){
         if(modules[name].dependencies.length > 0){
           edges = edges.concat(modules[name].dependencies.map(function(dep){
             return [name, dep];
           }));
+        }else{
+          nodes.push(name);
         }
       }
       
-      return toposort(edges).reverse().map(function(name){
+      return toposort.array(nodes, edges).reverse().map(function(name){
         return modules[name];
       });
     }
