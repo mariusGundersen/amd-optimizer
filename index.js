@@ -1,4 +1,5 @@
 var parse = require('./source/parse');
+var path = require('path');
 var locateModules = require('./source/locateModules');
 var findDependencies = require('./source/findDependencies');
 var nameAnonymousModule = require('./source/nameAnonymousModule');
@@ -39,6 +40,10 @@ module.exports = function(config){
         eventEmitter.emit('error', 'File object must contain property path');
         return;
       }
+      if('name' in file == false){
+        eventEmitter.emit('error', 'File object must contain property name');
+        return;
+      }
       
       
       locateModules(parse(file)).map(function(module){
@@ -56,7 +61,7 @@ module.exports = function(config){
           eventEmitter.emit('dependency', dependency);
         });
 
-        nameAnonymousModule(module.expression, file.name);
+        nameAnonymousModule(module.expression, path.basename(file.name, path.extname(file.name)));
         
         var name = module.expression.arguments[0].value;
         
