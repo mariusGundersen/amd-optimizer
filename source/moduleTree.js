@@ -9,12 +9,15 @@ module.exports = function(){
       if(!(name in modules)){
         modules[name] = {
           name: name,
+          dependencies: [],
+          source: '',
           defined: false
         };
       }
     },
     
     defineModule: function(name, source, dependencies, file){
+      console.log('define', name);
       modules[name] = {
         name: name,
         source: source,

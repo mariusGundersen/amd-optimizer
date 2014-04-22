@@ -46,7 +46,7 @@ module.exports = function(config){
       }
       
       
-      locateModules(parse(file)).map(function(module){
+      var dependenciesToLoad = locateModules(parse(file)).map(function(module){
         var dependencies = findDependencies(module.expression).map(function(name){
           var url = context.toUrl(name + '.js');
           
@@ -54,18 +54,26 @@ module.exports = function(config){
           
           return {url:url, name: name};
         });
-        
-        dependencies.filter(function(dependency){
-          return modules.hasDefined(dependency.name) == false;
-        }).forEach(function(dependency){
-          eventEmitter.emit('dependency', dependency);
-        });
 
-        nameAnonymousModule(module.expression, path.basename(file.name, path.extname(file.name)));
+        nameAnonymousModule(module.expression, file.path, config.baseUrl);
         
         var name = module.expression.arguments[0].value;
         
         modules.defineModule(name, print(module, name), dependencies.map(function(dep){ return dep.name; }), file);
+        
+        return dependencies;
+        
+      }).reduce(function(a, b){
+        return a.concat(b);
+      }, []);
+      
+      
+      
+        
+      dependenciesToLoad.filter(function(dependency){
+        return modules.hasDefined(dependency.name) == false;
+      }).forEach(function(dependency){
+        eventEmitter.emit('dependency', dependency);
       });
     },
     optimize: function(){
