@@ -24,10 +24,19 @@ module.exports = function(ast){
   
   var topLevel = ast.program.body;
     
-  return topLevel.filter(function(node){
+  return topLevel.map(function(node){
         
-    return isDefineNodeWithArgs(node.expression) || isRequireNodeWithArgs(node.expression);
-    
+    if(isDefineNodeWithArgs(node.expression) || isRequireNodeWithArgs(node.expression)){
+      return {
+        isModule: true,
+        node: node
+      }
+    }else{
+      return {
+        isModule: false,
+        node: node
+      }
+    }
     
   });
   

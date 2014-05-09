@@ -10,17 +10,16 @@ module.exports = function(){
         modules[name] = {
           name: name,
           dependencies: [],
-          source: '',
+          source: [],
           defined: false
         };
       }
     },
     
     defineModule: function(name, source, dependencies, file){
-            
       modules[name] = {
         name: name,
-        source: source,
+        source: name in modules ? modules[name].source.concat([source]) : [source],
         dependencies: dependencies,
         file: file,
         defined: true
@@ -44,8 +43,10 @@ module.exports = function(){
           edges = edges.concat(modules[name].dependencies.map(function(dep){
             return [name, dep];
           }));
+          nodes.push(name);
+        }else{
+          nodes.push(name);
         }
-        nodes.push(name);
       }
       
       return toposort.array(nodes, edges).reverse().map(function(name){

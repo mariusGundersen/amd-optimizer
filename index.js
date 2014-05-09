@@ -47,18 +47,27 @@ module.exports = function(config){
       
       
       var dependenciesToLoad = locateModules(parse(file)).map(function(module){
-        var dependencies = findDependencies(module.expression).map(function(name){
-          var url = context.toUrl(name + '.js');
-          
-          modules.addModule(name);
-          
-          return {url:url, name: name};
-        });
-
-        nameAnonymousModule(module.expression, file.name, config.baseUrl);
         
-        var name = module.expression.arguments[0].value;
-        modules.defineModule(name, print(module, name), dependencies.map(function(dep){ return dep.name; }), file);
+        if(module.isModule){
+          var dependencies = findDependencies(module.node.expression).filter(function(name){
+            return modules.has(name) == false;
+          }).map(function(name){
+            var url = context.toUrl(name + '.js');
+
+            modules.addModule(name);
+
+            return {url:url, name: name};
+          });
+
+          nameAnonymousModule(module.node.expression, file.name, config.baseUrl);
+
+          var name = module.node.expression.arguments[0].value;
+        }else{
+          var dependencies = [];
+          var name = file.name;
+        }
+        
+        modules.defineModule(name, module.node, dependencies.map(function(dep){ return dep.name; }), file);
         
         return dependencies;
         
@@ -69,17 +78,16 @@ module.exports = function(config){
       
       
         
-      dependenciesToLoad.filter(function(dependency){
-        return modules.hasDefined(dependency.name) == false;
-      }).forEach(function(dependency){
+      dependenciesToLoad.forEach(function(dependency){
         eventEmitter.emit('dependency', dependency);
       });
     },
     optimize: function(){
       return modules.leafToRoot().map(function(module){
+        var code = print(module.source, module.name);
         return {
-          code: module.source.code,
-          map: module.source.map,
+          code: code.code,
+          map: code.map,
           name: module.name
         };
       });

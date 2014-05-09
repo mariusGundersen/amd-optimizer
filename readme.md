@@ -7,6 +7,8 @@ Find all the dependencies of one or more amd modules and sort them in the correc
   [OK] find dependencies of a module  
   [OK] name anonymous modules  
   [OK] sort modules from leaf to root  
-  [OK] produce source-maps  
-  [MAYBE] use config file, including path, map and package  
+  [OK] produce source-maps
+  [OK] use config file, including path, map and package
+  [OK] exclude modules and paths
+  [  ] umd/iife declarations
   [  ] plugins
