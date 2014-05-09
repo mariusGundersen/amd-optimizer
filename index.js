@@ -55,10 +55,9 @@ module.exports = function(config){
           return {url:url, name: name};
         });
 
-        nameAnonymousModule(module.expression, file.path, config.baseUrl);
+        nameAnonymousModule(module.expression, file.name, config.baseUrl);
         
         var name = module.expression.arguments[0].value;
-        
         modules.defineModule(name, print(module, name), dependencies.map(function(dep){ return dep.name; }), file);
         
         return dependencies;

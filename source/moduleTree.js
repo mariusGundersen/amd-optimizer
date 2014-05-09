@@ -17,7 +17,7 @@ module.exports = function(){
     },
     
     defineModule: function(name, source, dependencies, file){
-      console.log('define', name);
+            
       modules[name] = {
         name: name,
         source: source,
@@ -44,9 +44,8 @@ module.exports = function(){
           edges = edges.concat(modules[name].dependencies.map(function(dep){
             return [name, dep];
           }));
-        }else{
-          nodes.push(name);
         }
+        nodes.push(name);
       }
       
       return toposort.array(nodes, edges).reverse().map(function(name){
