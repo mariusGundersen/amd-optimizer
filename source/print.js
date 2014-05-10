@@ -5,5 +5,5 @@ module.exports = function(module, name){
   
   var module = typeBuilders.program (module);
   
-  return recast.print(module, {sourceMapName: name});
+  return recast.print(module, {sourceMapName: name+'.js'});
 };
