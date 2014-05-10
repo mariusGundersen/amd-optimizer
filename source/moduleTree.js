@@ -43,13 +43,13 @@ module.exports = function(){
           edges = edges.concat(modules[name].dependencies.map(function(dep){
             return [name, dep];
           }));
-          nodes.push(name);
-        }else{
-          nodes.push(name);
         }
+        nodes.push(name);
       }
       
-      return toposort.array(nodes, edges).reverse().map(function(name){
+      return toposort.array(nodes, edges).reverse().filter(function(name){
+        return name in modules && modules[name].defined;
+      }).map(function(name){
         return modules[name];
       });
     }

@@ -45,18 +45,13 @@ module.exports = function(config){
         return;
       }
       
+      if(modules.hasDefined(file.name)) return;
       
       var dependenciesToLoad = locateModules(parse(file)).map(function(module){
         
         if(module.isModule){
-          var dependencies = findDependencies(module.node.expression).filter(function(name){
-            return modules.has(name) == false;
-          }).map(function(name){
-            var url = context.toUrl(name + '.js');
-
-            modules.addModule(name);
-
-            return {url:url, name: name};
+          var dependencies = findDependencies(module.node.expression).map(function(name){
+            return {url:context.toUrl(name + '.js'), name: name};
           });
 
           nameAnonymousModule(module.node.expression, file.name, config.baseUrl);
@@ -68,17 +63,17 @@ module.exports = function(config){
         }
         
         modules.defineModule(name, module.node, dependencies.map(function(dep){ return dep.name; }), file);
-        
+                
         return dependencies;
         
       }).reduce(function(a, b){
         return a.concat(b);
       }, []);
       
-      
-      
-        
-      dependenciesToLoad.forEach(function(dependency){
+      dependenciesToLoad.filter(function(dependency){
+        return modules.has(dependency.name) == false;        
+      }).forEach(function(dependency){
+        modules.addModule(dependency.name);
         eventEmitter.emit('dependency', dependency);
       });
     },
