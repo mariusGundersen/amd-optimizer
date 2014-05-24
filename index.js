@@ -83,7 +83,8 @@ module.exports = function(config){
         return {
           code: code.code,
           map: code.map,
-          name: module.name
+          name: module.name,
+          source: module.file.source
         };
       });
     }

@@ -1,13 +1,13 @@
 {
   "name": "amd-optimizer",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Marius Gundersen",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "recast": "^0.5.16",
     "requirejs": "^2.1.11",
