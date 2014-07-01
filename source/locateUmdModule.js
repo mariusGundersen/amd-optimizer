@@ -7,7 +7,7 @@ module.exports = function(astExpression){
   
   traverse(astExpression, {
     pre: function(node, parent, prop, idx){
-      var result = isIfDefineAndAmd(node);
+      var result = findDefine(node);
       if(result){
         hasBeenFound = true;
         defineCall = result;
@@ -22,10 +22,22 @@ module.exports = function(astExpression){
   return defineCall;
 };
 
+function findDefine(node){
+  return isIfDefineAndAmd(node)
+      || isConditionalDefineAndAmd(node);
+}
+
 function isIfDefineAndAmd(node){
   return node && node.type === 'IfStatement' 
       && isUmdTest(node.test)
       && containsDefineStatement(node.consequent);
+}
+
+function isConditionalDefineAndAmd(node){
+  return node && node.type === 'ConditionalExpression' 
+      && isUmdTest(node.test)
+      && node.consequent.type === 'Identifier'
+      && node.consequent.name === 'define' && (node.consequent.parent = node, node.consequent);
 }
 
 function isUmdTest(expression){
