@@ -13,6 +13,8 @@ var file = loadFile(__dirname+"/modules/test.js", "test");
 
 var optimizer = optimize({
   baseUrl: 'modules'
+}, {
+  umd: true
 });
 
 optimizer.on('dependency', function(dependency){

@@ -21,7 +21,7 @@ function extend(target, parent){
 }
 
 
-module.exports = function(config){
+module.exports = function(config, options){
   
   var eventEmitter = new EventEmitter();
   
@@ -47,22 +47,20 @@ module.exports = function(config){
       
       if(modules.hasDefined(file.name)) return;
       
-      var dependenciesToLoad = locateModules(parse(file)).map(function(module){
+      var dependenciesToLoad = locateModules(parse(file), options.umd).map(function(module){
         
         if(module.isModule){
-          var dependencies = findDependencies(module.node.expression).map(function(name){
+          var dependencies = findDependencies(module.defineCall).map(function(name){
             return {url:context.toUrl(name + '.js'), name: name};
           });
 
-          nameAnonymousModule(module.node.expression, file.name, config.baseUrl);
-
-          var name = module.node.expression.arguments[0].value;
+          var name = nameAnonymousModule(module.defineCall, file.name, config.baseUrl);
         }else{
           var dependencies = [];
           var name = file.name;
         }
         
-        modules.defineModule(name, module.node, dependencies.map(function(dep){ return dep.name; }), file);
+        modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
                 
         return dependencies;
         

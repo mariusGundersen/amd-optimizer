@@ -1,4 +1,4 @@
-
+var locateUmdDefine = require('./locateUmdModule');
 
 
 function isDefineNodeWithArgs (node) {
@@ -13,14 +13,10 @@ function isRequireNodeWithArgs (node) {
          node.callee.name === 'require';
 };
 
-function findCallExpression(node){
-  return node.type === 'CallExpression' ? node : 
-         node.type === 'ExpressionStatement' ? findCallExpression(node.expression) :
-         null;
-}
 
 
-module.exports = function(ast){
+
+module.exports = function(ast, locateUmd){
   
   var topLevel = ast.program.body;
     
@@ -29,12 +25,22 @@ module.exports = function(ast){
     if(isDefineNodeWithArgs(node.expression) || isRequireNodeWithArgs(node.expression)){
       return {
         isModule: true,
-        node: node
+        rootAstNode: node,
+        defineCall: node.expression
+      }
+    }else if(locateUmd){
+      var defineCall = locateUmdDefine(node.expression);
+      
+      return {
+        isModule: defineCall != null,
+        rootAstNode: node,
+        defineCall: defineCall
       }
     }else{
       return {
         isModule: false,
-        node: node
+        rootAstNode: node,
+        defineCall: null
       }
     }
     

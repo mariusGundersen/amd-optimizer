@@ -1,6 +1,6 @@
 {
   "name": "amd-optimizer",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
   "dependencies": {
     "recast": "^0.5.16",
     "requirejs": "^2.1.11",
-    "toposort": "^0.2.10"
+    "toposort": "^0.2.10",
+    "ast-traverse": "~0.1.1"
   }
 }
