@@ -61,8 +61,9 @@ function isDefineAmd(expression){
   return expression && expression.type === 'MemberExpression'
       && expression.object && expression.object.type === 'Identifier'
       && expression.object.name === 'define'
-      && expression.property && expression.property.type === 'Identifier'
-      && expression.property.name === 'amd';
+      && expression.property
+      && (expression.property.type === 'Identifier' && expression.property.name === 'amd' 
+      || expression.property.type === 'Literal' && expression.property.value === 'amd' );
 }
 
 function containsDefineStatement(statement){

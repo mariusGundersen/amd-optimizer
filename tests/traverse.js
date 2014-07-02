@@ -1,6 +1,6 @@
 var traverse = require('ast-traverse');
 var fs = require('fs');
-var ast = require("recast").parse(fs.readFileSync(process.argv[1]));
+var ast = require("recast").parse(fs.readFileSync(process.argv[2]));
 
 var indent = 0;
 traverse(ast, {

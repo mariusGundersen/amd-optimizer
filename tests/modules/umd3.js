@@ -4,7 +4,7 @@
         // [1] CommonJS/Node.js
         var target = module['exports'] || exports; // module.exports is for Node.js
         factory(target);
-    } else if (typeof define === 'function' && define.amd) {
+    } else if (typeof define === 'function' && define['amd']) {
         // [2] AMD anonymous module
         define(factory);
     } else {
