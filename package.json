@@ -1,10 +1,10 @@
 {
   "name": "amd-optimizer",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "Marius Gundersen",
   "license": "MIT",
@@ -12,6 +12,10 @@
     "recast": "^0.5.16",
     "requirejs": "^2.1.11",
     "toposort": "^0.2.10",
-    "ast-traverse": "~0.1.1"
+    "ast-traverse": "~0.1.1",
+    "strip-bom": "^1.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^1.21.4"
   }
 }

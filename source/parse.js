@@ -1,10 +1,11 @@
 var recast = require('recast');
-
+var stripBOM = require('strip-bom');
 
 module.exports = function(file){
-  
-  var ast = recast.parse(file.source, { sourceFileName: file.name+'.js' });
-  
-  return ast;
-  
+  return recast.parse(
+    stripBOM(file.source),
+    {
+      sourceFileName: file.name+'.js'
+    }
+  );
 };
