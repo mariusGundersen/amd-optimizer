@@ -42,6 +42,16 @@ describe("require config", function(){
   it("should name the jQuery module correctly", function(){
     assert.equal(output[0].content, fs.readFileSync(cwd + '/config/bin/jQuery.js').toString('utf8'));
   });
+  
+  it("should put the right name on the sourcemap for the main file", function(){
+    assert.equal(output[1].map.file, 'main.js');
+    assert.equal(output[1].map.sources[0], 'main.js');
+  });
+  
+  it("should put the right name on the sourcemap for the jQuery file", function(){
+    assert.equal(output[0].map.file, 'jQuery.js');
+    assert.equal(output[0].map.sources[0], '../lib/jQuery.js');
+  });
 });
 
 function loadFile(dependency, base, cwd){
