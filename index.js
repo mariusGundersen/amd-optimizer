@@ -1,31 +1,17 @@
 var parse = require('./source/parse');
-var path = require('path');
 var locateModules = require('./source/locateModules');
 var findDependencies = require('./source/findDependencies');
 var nameAnonymousModule = require('./source/nameAnonymousModule');
 var print = require('./source/print');
 var moduleTree = require('./source/moduleTree');
+var dependencyQueue = require('./source/dependencyQueue');
+var path = require('path');
 var requirejs = require('requirejs');
 var EventEmitter = require('events').EventEmitter;
 var slash = require('slash');
-var dependencyQueue = require('./source/dependencyQueue');
-
-function extend(target, parent){
-  var targetDefinition = {};
-  
-  for(var name in target){
-    if (target.hasOwnProperty(name)) {
-      targetDefinition[name] = {value: target[name], enumerable: true};
-    }
-  }
-  
-  return Object.create(parent, targetDefinition);
-}
-
+var _ = require('lodash');
 
 module.exports = function(config, options){
-  
-  var eventEmitter = new EventEmitter();
   
   var context = requirejs(config || {});
   
@@ -33,19 +19,19 @@ module.exports = function(config, options){
   
   var pendingModules = dependencyQueue();
   
-  return extend({
+  return _.extend(new EventEmitter(), {
     addFile: function(file){
       
       if('contents' in file == false){
-        eventEmitter.emit('error', 'File object must contain content');
+        this.emit('error', 'File object must contain content');
         return;
       }
       if('name' in file == false){
-        eventEmitter.emit('error', 'File object must contain property name');
+        this.emit('error', 'File object must contain property name');
         return;
       }
       if('relative' in file == false){
-        eventEmitter.emit('error', 'File object must contain property relative');
+        this.emit('error', 'File object must contain property relative');
         return;
       }
             
@@ -73,8 +59,8 @@ module.exports = function(config, options){
         return modules.has(dependency.name) == false && pendingModules.isMissing(dependency);        
       }).forEach(function(dependency){
         pendingModules.push(dependency);
-        eventEmitter.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
-      });
+        this.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
+      }, this);
     },
     optimize: function(){
       return modules.leafToRoot().map(function(module){
@@ -88,7 +74,7 @@ module.exports = function(config, options){
       });
     }
     
-  }, eventEmitter);
+  });
   
 };
 
