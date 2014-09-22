@@ -4,7 +4,7 @@ var findDependencies = require('./source/findDependencies');
 var nameAnonymousModule = require('./source/nameAnonymousModule');
 var print = require('./source/print');
 var moduleTree = require('./source/moduleTree');
-var dependencyQueue = require('./source/dependencyQueue');
+var missingModules = require('./source/missingModules');
 var path = require('path');
 var requirejs = require('requirejs');
 var EventEmitter = require('events').EventEmitter;
@@ -17,11 +17,15 @@ module.exports = function(config, options){
   
   var modules = moduleTree();
   
-  var pendingModules = dependencyQueue();
+  var pendingModules = missingModules();
   
   return _.extend(new EventEmitter(), {
-    addFile: function(file){
+    addFile: function(err, file){
       
+      if(err){
+        this.emit('error', err);
+        return;
+      }      
       if('contents' in file == false){
         this.emit('error', 'File object must contain content');
         return;
@@ -35,48 +39,63 @@ module.exports = function(config, options){
         return;
       }
             
-      if(modules.has(file.name)) return;
-      
-      locateModules(parse(file), options.umd).map(function(module){
-        
-        if(module.isModule){
-          var dependencies = findDependencies(module.defineCall).map(function(name){
-            return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
-          });
+      if(modules.isMissing(file.name)){
+        pendingModules.remove(file.name);
+
+        locateModules(parse(file), options.umd).map(function(module){
+
+          if(module.isModule){
+            var dependencies = findDependencies(module.defineCall).map(function(name){
+              return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
+            });
+
+            nameAnonymousModule(module.defineCall, file.name);
+          }else{
+            var dependencies = [];
+          }
+
+          modules.defineModule(file.name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
+
+          return dependencies;
+
+        }).reduce(function(a, b){
+          return a.concat(b);
+        }, []).forEach(function(dependency){
+          if(modules.has(dependency.name) || pendingModules.has(dependency.name)){
+            return;
+          }
           
-          nameAnonymousModule(module.defineCall, file.name);
-        }else{
-          var dependencies = [];
-        }
-        
-        modules.defineModule(file.name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
-                
-        return dependencies;
-        
-      }).reduce(function(a, b){
-        return a.concat(b);
-      }, []).forEach(function(dependency){
-        if(modules.has(dependency.name) || pendingModules.has(dependency.name)){
-          return;
-        }
-        
-        pendingModules.push(dependency.name);
-        this.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
-      }, this);
+          pendingModules.add(dependency.name);
+          this.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
+        }, this);
+      }
+      
+      if(pendingModules.isEmpty()){
+        this.emit('done');
+      }
     },
-    optimize: function(){
-      return modules.leafToRoot().map(function(module){
-        var code = print(module.source, module.name);
-        return {
-          content: code.code,
-          map: code.map,
-          name: slash(module.name),
-          source: module.file.source
-        };
-      });
+    done: function(done){
+      if(pendingModules.isEmpty()){
+        done(optimize());
+      }else{
+        this.on('done', function(){
+          done(optimize());
+        });
+      }
     }
-    
   });
+  
+  function optimize(){
+    return modules.leafToRoot().map(function(module){
+      var code = print(module.source, module.name);
+      return {
+        content: code.code,
+        map: code.map,
+        name: slash(module.name),
+        source: module.file.source
+      };
+    });
+  }
   
 };
 

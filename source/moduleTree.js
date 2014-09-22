@@ -34,9 +34,12 @@ module.exports = function(){
         }
         nodes.push(name);
       }
-      
+            
       return toposort.array(nodes, edges)
-      .reverse().map(function(name){
+      .reverse()
+      .filter(function(name){
+        return name in modules;
+      }).map(function(name){
         return modules[name];
       });
     }

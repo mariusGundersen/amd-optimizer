@@ -5,14 +5,14 @@ module.exports = function(){
   var q = [];
   
   return {
-    push: function(name){
-      if(this.isMissing(name)){
+    add: function(name){
+      if(this.has(name)){
         return;
       }
       q.push(name);
     },
-    pop: function(){
-      return q.shift();
+    remove: function(name){
+      return _.pull(q, name);
     },
     isEmpty: function(){
       return q.length == 0;
