@@ -4,34 +4,18 @@ module.exports = function(){
   
   var modules = Object.create(null);
   
-  return {
-    addModule: function(name){
-      if(!(name in modules)){
-        modules[name] = {
-          name: name,
-          dependencies: [],
-          source: [],
-          defined: false
-        };
-      }
-    },
-    
+  return {    
     defineModule: function(name, source, dependencies, file){
       modules[name] = {
         name: name,
         source: name in modules ? modules[name].source.concat([source]) : [source],
         dependencies: dependencies,
-        file: file,
-        defined: true
+        file: file
       };
     },
     
     has: function(name){
       return name in modules;
-    },
-    
-    hasDefined: function(name){
-      return (name in modules) && modules[name].defined; 
     },
     
     leafToRoot: function(){
@@ -47,9 +31,8 @@ module.exports = function(){
         nodes.push(name);
       }
       
-      return toposort.array(nodes, edges).reverse().filter(function(name){
-        return name in modules && modules[name].defined;
-      }).map(function(name){
+      return toposort.array(nodes, edges)
+      .reverse().map(function(name){
         return modules[name];
       });
     }

@@ -32,7 +32,7 @@ describe("require config", function(){
   });
   
   it("should have jQuery first", function(){
-    assert.equal(output[0].name, '../lib/jQuery');
+    assert.equal(output[0].name, 'jQuery');
   });
   
   it("should have main last", function(){
