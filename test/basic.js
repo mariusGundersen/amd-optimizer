@@ -6,10 +6,10 @@ var File = require('vinyl');
 describe("Basic dependency sorting", function(){
   
   var cwd = __dirname;
-  var base = cwd + '/modules';
+  var base = cwd + '/basic/modules';
   
   
-  var file = loadFile(__dirname + '/modules/test.js', base, cwd);
+  var file = loadFile({path: base + '/test.js', name: 'test'}, base, cwd);
 
   var optimizer = optimize({
     baseUrl: base
@@ -25,25 +25,27 @@ describe("Basic dependency sorting", function(){
 
   var output = optimizer.optimize();
   it("should have 5 items", function(){
-    assert.equal(5, output.length);
+    assert.equal(output.length, 5);
   });
   
   it("should have the test last", function(){
-    assert.equal('test', output[4].name);
+    assert.equal(output[4].name, 'test');
   });
   
   output.forEach(function(actual){
     it(actual.name + " should have a named module", function(){
-      assert.equal(actual.code, fs.readFileSync(__dirname + '/namedModules/' + actual.name + '.js').toString('utf8'));
+      assert.equal(actual.content, fs.readFileSync(cwd + '/basic/namedModules/' + actual.name + '.js').toString('utf8'));
     });
   });
 });
 
-function loadFile(path, base, cwd){
-  return new File({
-    path: path,
+function loadFile(dependency, base, cwd){
+  var file = new File({
+    path: dependency.path,
     cwd: cwd,
     base: base,
-    contents: fs.readFileSync(path)
+    contents: fs.readFileSync(dependency.path)
   });
+  file.name = dependency.name;
+  return file;
 }

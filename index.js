@@ -7,6 +7,7 @@ var print = require('./source/print');
 var moduleTree = require('./source/moduleTree');
 var requirejs = require('requirejs');
 var EventEmitter = require('events').EventEmitter;
+var slash = require('slash');
 
 function extend(target, parent){
   var targetDefinition = {};
@@ -51,15 +52,17 @@ module.exports = function(config, options){
         
         if(module.isModule){
           var dependencies = findDependencies(module.defineCall).map(function(name){
-            return path.relative(config.baseUrl, context.toUrl(name));
+            return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
           });
-          var name = nameAnonymousModule(module.defineCall, removeExt(file.relative));
+          
+          nameAnonymousModule(module.defineCall, file.name);
+          var name = removeExt(file.relative);
         }else{
           var dependencies = [];
-          var name = file.relative;
+          var name = removeExt(file.relative);
         }
         
-        modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep; }), file);
+        modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep.path; }), file);
                 
         return dependencies;
         
@@ -68,19 +71,19 @@ module.exports = function(config, options){
       }, []);
             
       dependenciesToLoad.filter(function(dependency){
-        return modules.has(dependency) == false;        
+        return modules.has(dependency.path) == false;        
       }).forEach(function(dependency){
-        modules.addModule(dependency);
-        eventEmitter.emit('dependency', path.join(config.baseUrl, dependency + '.js'));
+        modules.addModule(dependency.path);
+        eventEmitter.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
       });
     },
     optimize: function(){
       return modules.leafToRoot().map(function(module){
         var code = print(module.source, module.name);
         return {
-          code: code.code,
+          content: code.code,
           map: code.map,
-          name: module.name,
+          name: slash(module.name),
           source: module.file.source
         };
       });

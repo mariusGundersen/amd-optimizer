@@ -14,7 +14,8 @@
     "toposort": "^0.2.10",
     "ast-traverse": "~0.1.1",
     "strip-bom": "^1.0.0",
-    "vinyl": "~0.4.3"
+    "vinyl": "~0.4.3",
+    "slash": "^1.0.0"
   },
   "devDependencies": {
     "mocha": "^1.21.4"
