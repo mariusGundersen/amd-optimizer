@@ -3,11 +3,11 @@ var optimize = require('../index.js');
 var assert = require('assert');
 var File = require('vinyl');
 
-describe("Basic dependency sorting", function(){
+describe("Duplicate file", function(){
   
   var cwd = __dirname;
   var base = cwd + '/basic/modules';
-    
+  
   var optimizer = optimize({
     baseUrl: base
   }, {
@@ -19,6 +19,7 @@ describe("Basic dependency sorting", function(){
   });
 
   optimizer.addFile(loadFile({path: base + '/test.js', name: 'test'}, base, cwd));
+  optimizer.addFile(loadFile({path: base + '/add.js', name: 'add'}, base, cwd));
 
   var output = optimizer.optimize();
   it("should have 5 items", function(){

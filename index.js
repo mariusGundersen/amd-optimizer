@@ -55,10 +55,12 @@ module.exports = function(config, options){
         
       }).reduce(function(a, b){
         return a.concat(b);
-      }, []).filter(function(dependency){
-        return modules.has(dependency.name) == false && pendingModules.isMissing(dependency);        
-      }).forEach(function(dependency){
-        pendingModules.push(dependency);
+      }, []).forEach(function(dependency){
+        if(modules.has(dependency.name) || pendingModules.has(dependency.name)){
+          return;
+        }
+        
+        pendingModules.push(dependency.name);
         this.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
       }, this);
     },

@@ -5,14 +5,11 @@ module.exports = function(){
   var q = [];
   
   return {
-    push: function(item){
-      if(_.any(q, {name: item.name}) || _.any(q, {path: item.path})){
+    push: function(name){
+      if(this.isMissing(name)){
         return;
       }
-      q.push({
-        name: item.name,
-        path: item.path
-      });
+      q.push(name);
     },
     pop: function(){
       return q.shift();
@@ -20,8 +17,11 @@ module.exports = function(){
     isEmpty: function(){
       return q.length == 0;
     },
-    isMissing: function(item){
-      return !_.any(q, {name: item.name}) && !_.any(q, {path: item.path})
+    has: function(name){
+      return _.contains(q, name);
+    },
+    isMissing: function(name){
+      return !this.has(name);
     }
   };
   

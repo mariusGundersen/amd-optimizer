@@ -18,6 +18,10 @@ module.exports = function(){
       return name in modules;
     },
     
+    isMissing: function(name){
+      return !this.has(name);
+    },
+    
     leafToRoot: function(){
       var edges = [];
       var nodes = [];

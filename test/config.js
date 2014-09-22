@@ -8,9 +8,6 @@ describe("require config", function(){
   var cwd = __dirname;
   var base = cwd + '/config/src';
   
-  
-  var file = loadFile({path: base + '/main.js', name: 'main'}, base, cwd);
-  
   var optimizer = optimize({
     baseUrl: base,
     paths: {
@@ -24,7 +21,7 @@ describe("require config", function(){
     optimizer.addFile(loadFile(dependency, base, cwd))
   });
 
-  optimizer.addFile(file);
+  optimizer.addFile(loadFile({path: base + '/main.js', name: 'main'}, base, cwd));
 
   var output = optimizer.optimize();
   it("should have 2 items", function(){
