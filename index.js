@@ -32,47 +32,46 @@ module.exports = function(config, options){
   return extend({
     addFile: function(file){
       
-      if('source' in file == false){
-        eventEmitter.emit('error', 'File object must contain source');
+      if('contents' in file == false){
+        eventEmitter.emit('error', 'File object must contain content');
         return;
       }
       if('path' in file == false){
         eventEmitter.emit('error', 'File object must contain property path');
         return;
       }
-      if('name' in file == false){
-        eventEmitter.emit('error', 'File object must contain property name');
+      if('relative' in file == false){
+        eventEmitter.emit('error', 'File object must contain property relative');
         return;
       }
-      
-      if(modules.hasDefined(file.name)) return;
+            
+      if(modules.hasDefined(file.relative)) return;
       
       var dependenciesToLoad = locateModules(parse(file), options.umd).map(function(module){
         
         if(module.isModule){
           var dependencies = findDependencies(module.defineCall).map(function(name){
-            return {url:context.toUrl(name + '.js'), name: name};
+            return path.relative(config.baseUrl, context.toUrl(name));
           });
-
-          var name = nameAnonymousModule(module.defineCall, file.name, config.baseUrl);
+          var name = nameAnonymousModule(module.defineCall, removeExt(file.relative));
         }else{
           var dependencies = [];
-          var name = file.name;
+          var name = file.relative;
         }
         
-        modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
+        modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep; }), file);
                 
         return dependencies;
         
       }).reduce(function(a, b){
         return a.concat(b);
       }, []);
-      
+            
       dependenciesToLoad.filter(function(dependency){
-        return modules.has(dependency.name) == false;        
+        return modules.has(dependency) == false;        
       }).forEach(function(dependency){
-        modules.addModule(dependency.name);
-        eventEmitter.emit('dependency', dependency);
+        modules.addModule(dependency);
+        eventEmitter.emit('dependency', path.join(config.baseUrl, dependency + '.js'));
       });
     },
     optimize: function(){
@@ -90,3 +89,7 @@ module.exports = function(config, options){
   }, eventEmitter);
   
 };
+
+function removeExt(file){
+  return /^(.*)(\.js)$/.exec(file)[1];
+}

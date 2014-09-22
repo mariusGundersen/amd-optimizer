@@ -3,9 +3,9 @@ var stripBOM = require('strip-bom');
 
 module.exports = function(file){
   return recast.parse(
-    stripBOM(file.source),
+    stripBOM(file.contents),
     {
-      sourceFileName: file.name+'.js'
+      sourceFileName: file.relative
     }
   );
 };

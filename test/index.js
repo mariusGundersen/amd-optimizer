@@ -1,26 +1,24 @@
 var fs = require('fs');
 var optimize = require('../index.js');
 var assert = require('assert');
-
-function loadFile(path, name){
-  return {
-    name: name,
-    path: path,
-    source: fs.readFileSync(path)
-  };
-}
+var File = require('vinyl');
 
 describe("Basic dependency sorting", function(){
-  var file = loadFile(__dirname + '/modules/test.js', 'test');
+  
+  var cwd = __dirname;
+  var base = cwd + '/modules';
+  
+  
+  var file = loadFile(__dirname + '/modules/test.js', base, cwd);
 
   var optimizer = optimize({
-    baseUrl: 'modules'
+    baseUrl: base
   }, {
     umd: true
   });
 
   optimizer.on('dependency', function(dependency){
-    optimizer.addFile(loadFile(__dirname + '/' + dependency.url, dependency.name))
+    optimizer.addFile(loadFile(dependency, base, cwd))
   });
 
   optimizer.addFile(file);
@@ -40,3 +38,12 @@ describe("Basic dependency sorting", function(){
     });
   });
 });
+
+function loadFile(path, base, cwd){
+  return new File({
+    path: path,
+    cwd: cwd,
+    base: base,
+    contents: fs.readFileSync(path)
+  });
+}
