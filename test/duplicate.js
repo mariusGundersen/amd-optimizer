@@ -1,7 +1,8 @@
 var fs = require('fs');
 var optimize = require('../index.js');
 var assert = require('assert');
-var File = require('vinyl');
+var loadFile = require('./utils/loadFile');
+var _ = require('lodash');
 
 describe("Duplicate file", function(done){
   
@@ -42,25 +43,10 @@ describe("Duplicate file", function(done){
     assert.equal(output[4].name, 'test');
   });
 
-  output.forEach(function(name, index){
+  output.forEach(function(name){
     it(name + " should have a named module", function(){
-      assert.equal(output[index].content, fs.readFileSync(cwd + '/basic/namedModules/' + name + '.js').toString('utf8'));
+      assert.equal(_.where(output, {name:name})[0].content, fs.readFileSync(cwd + '/basic/namedModules/' + name + '.js').toString('utf8'));
     });
   });
   
 });
-
-function loadFile(dependency, base, cwd, done){
-  fs.readFile(dependency.path, function(err, contents){
-    if(err) return done(err);
-    
-    var file = new File({
-      path: dependency.path,
-      cwd: cwd,
-      base: base,
-      contents: contents
-    });
-    file.name = dependency.name;
-    done(null, file);
-  });
-}

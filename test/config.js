@@ -1,7 +1,7 @@
 var fs = require('fs');
 var optimize = require('../index.js');
 var assert = require('assert');
-var File = require('vinyl');
+var loadFile = require('./utils/loadFile');
 
 describe("require config", function(){
 
@@ -60,18 +60,3 @@ describe("require config", function(){
     assert.equal(output[0].map.sources[0], '../lib/jQuery.js');
   });
 });
-
-function loadFile(dependency, base, cwd, done){
-  fs.readFile(dependency.path, function(err, contents){
-    if(err) return done(err);
-    
-    var file = new File({
-      path: dependency.path,
-      cwd: cwd,
-      base: base,
-      contents: contents
-    });
-    file.name = dependency.name;
-    done(null, file);
-  });
-}

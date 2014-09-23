@@ -13,6 +13,8 @@ var _ = require('lodash');
 
 module.exports = function(config, options){
   
+  options = options || {};
+  
   var context = requirejs(config || {});
   
   var modules = moduleTree();
@@ -48,13 +50,13 @@ module.exports = function(config, options){
             var dependencies = findDependencies(module.defineCall).map(function(name){
               return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
             });
-
-            nameAnonymousModule(module.defineCall, file.name);
+            var name = nameAnonymousModule(module.defineCall, file.name);
           }else{
             var dependencies = [];
+            var name = file.name;
           }
 
-          modules.defineModule(file.name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
+          modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
 
           return dependencies;
 
