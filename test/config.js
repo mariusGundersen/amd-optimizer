@@ -13,8 +13,13 @@ describe("require config", function(){
     var optimizer = optimize({
       baseUrl: base,
       paths: {
-        jQuery: '../lib/jQuery'
-      }
+        jQuery: '../lib/jQuery',
+        knockout: '../lib/knockout'
+      },
+      exclude: [
+        'knockout',
+        'deco'
+      ]
     }, {
       umd: true
     });

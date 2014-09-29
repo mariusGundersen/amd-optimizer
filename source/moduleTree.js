@@ -34,7 +34,7 @@ module.exports = function(){
         }
         nodes.push(name);
       }
-            
+      
       return toposort.array(nodes, edges)
       .reverse()
       .filter(function(name){

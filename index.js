@@ -13,9 +13,10 @@ var _ = require('lodash');
 
 module.exports = function(config, options){
   
+  config = config || {};
   options = options || {};
   
-  var context = requirejs(config || {});
+  var context = requirejs(config);
   
   var modules = moduleTree();
   
@@ -47,7 +48,9 @@ module.exports = function(config, options){
         locateModules(parse(file), options.umd).map(function(module){
 
           if(module.isModule){
-            var dependencies = findDependencies(module.defineCall).map(function(name){
+            var dependencies = findDependencies(module.defineCall).filter(function(name){
+              return !excluded(config, name);
+            }).map(function(name){
               return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
             });
             var name = nameAnonymousModule(module.defineCall, file.name);
@@ -101,6 +104,14 @@ module.exports = function(config, options){
   
 };
 
-function removeExt(file){
-  return /^(.*)(\.js)$/.exec(file)[1];
+function excluded(config, name){
+  var path = name.split('/');
+  return 'exclude' in config && config.exclude.some(function(prefix){
+    var prefixPath = prefix.split('/');
+    if(prefixPath.length > path.length) return false;
+    var startOfPath = _.take(path, prefixPath.length);
+    return _.zip(startOfPath, prefixPath).every(function(segment){
+      return segment[0] === segment[1];
+    });
+  });
 }

@@ -1,3 +1,3 @@
-define(['jQuery'], function($){
+define(['jQuery', 'knockout', 'deco/qvc'], function($){
    $('');
 });
