@@ -14,7 +14,8 @@ Find all the dependencies of one or more amd modules and sort them in the correc
   - [ ] use map
 - [ ] relative dependencies
 - [x] exclude modules and paths  
-- [x] umd/iife declarations  
+- [x] umd/iife declarations
+- [ ] commonJS style define
 - [ ] plugins  
 
 
