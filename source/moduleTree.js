@@ -4,25 +4,13 @@ module.exports = function(){
   
   var modules = Object.create(null);
   
-  return {
-    addModule: function(name){
-      if(!(name in modules)){
-        modules[name] = {
-          name: name,
-          dependencies: [],
-          source: [],
-          defined: false
-        };
-      }
-    },
-    
+  return {    
     defineModule: function(name, source, dependencies, file){
       modules[name] = {
         name: name,
         source: name in modules ? modules[name].source.concat([source]) : [source],
         dependencies: dependencies,
-        file: file,
-        defined: true
+        file: file
       };
     },
     
@@ -30,8 +18,8 @@ module.exports = function(){
       return name in modules;
     },
     
-    hasDefined: function(name){
-      return (name in modules) && modules[name].defined; 
+    isMissing: function(name){
+      return !this.has(name);
     },
     
     leafToRoot: function(){
@@ -47,8 +35,10 @@ module.exports = function(){
         nodes.push(name);
       }
       
-      return toposort.array(nodes, edges).reverse().filter(function(name){
-        return name in modules && modules[name].defined;
+      return toposort.array(nodes, edges)
+      .reverse()
+      .filter(function(name){
+        return name in modules;
       }).map(function(name){
         return modules[name];
       });

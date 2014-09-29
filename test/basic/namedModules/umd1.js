@@ -1,4 +1,4 @@
-((function(root, factory) {
+(function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define("umd1", [], factory);
@@ -6,7 +6,7 @@
         // Browser globals
         root.amdWeb = factory(root.b);
     }
-})(this, function (b) {
+}(this, function (b) {
     //use b in some fashion.
 
     // Just return a value to define the module export.
