@@ -4,43 +4,14 @@ var optimize = require('../index.js');
 var assert = require('assert');
 var loadFileFromNet = require('./utils/loadFileFromNet');
 var _ = require('lodash');
-var http = require('http');
 var path = require('path');
-var connect = require('connect'); // add to write web server
 var url = require('url');
 
 describe("Load through HTTP", function(){
 
   var cwd = __dirname;
-  var basePath = '/basic/modules';
-  var base = 'http://127.0.0.1:18080' + basePath;
+  var base = 'http://url/basic/modules';
   var output = ['umd3', 'umd2', 'umd1', 'add', 'test'];
-
-  // set-up and run web server
-  before(function(done){
-    // set-up server
-    var app = connect();
-    app.use(function(req, res, next){
-      // pass only baseUrl
-      if(req.url.indexOf(basePath) == 0) {
-        fs.readFile(path.join(cwd, req.url.slice(1)), function(err, content){
-          if(err) throw new Error("Error: can't read file");
-          res.end(content);
-        });
-      }else{
-        return next();
-      }
-    });
-
-    // run server
-    this.server = http.createServer(app).listen(18080, "127.0.0.1", function() {
-      done();
-    });
-  });
-
-  after(function() {
-    this.server.close();
-  });
 
   before(function(done){
     var optimizer = optimize({

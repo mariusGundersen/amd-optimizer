@@ -1,21 +1,22 @@
-var http = require('http');
+var fs = require('fs');
+var url = require('url');
+var path = require('path');
 var File = require('vinyl');
 
 module.exports = function loadFileFromNet(dependency, base, cwd, done){
-  http.get(dependency.path, function(res){
+  var urlStr = dependency.path;
+  var parsedUrl = url.parse(urlStr);
+  var filePath = path.join(cwd, parsedUrl.pathname);
+  fs.readFile(filePath, function(err, contents){
+    if(err) return done(err);
+
     var file = new File({
-      path: dependency.path,
+      path: filePath,
       cwd: cwd,
-      base: base
+      base: base,
+      contents: contents
     });
-    file.name = dependency.name
-
-    res.on("data", function(contents){
-      file.contents = contents;
-    });
-
-    res.on("end", function(err){
-      done(null, file);
-    });
+    file.name = dependency.name;
+    done(null, file);
   });
 }
