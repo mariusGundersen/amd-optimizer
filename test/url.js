@@ -2,7 +2,7 @@
 var fs = require('fs');
 var optimize = require('../index.js');
 var assert = require('assert');
-var loadFileFromNet = require('./utils/loadFileFromNet');
+var loadFileFromFakeNet = require('./utils/loadFileFromFakeNet');
 var _ = require('lodash');
 var path = require('path');
 var url = require('url');
@@ -21,10 +21,10 @@ describe("Load through HTTP", function(){
     });
 
     optimizer.on('dependency', function(dependency){
-      loadFileFromNet(dependency, base, cwd, optimizer.addFile.bind(optimizer));
+      loadFileFromFakeNet(dependency, base, cwd, optimizer.addFile.bind(optimizer));
     });
 
-    loadFileFromNet({path: base + '/test.js', name: 'test'}, base, cwd, function(err, file){
+    loadFileFromFakeNet({path: base + '/test.js', name: 'test'}, base, cwd, function(err, file){
       optimizer.addFile(err, file);
 
       optimizer.done(function(optimized){

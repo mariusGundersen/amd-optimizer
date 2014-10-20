@@ -3,7 +3,7 @@ var url = require('url');
 var path = require('path');
 var File = require('vinyl');
 
-module.exports = function loadFileFromNet(dependency, base, cwd, done){
+module.exports = function loadFileFromFakeNet(dependency, base, cwd, done){
   var urlStr = dependency.path;
   var parsedUrl = url.parse(urlStr);
   var filePath = path.join(cwd, parsedUrl.pathname);
