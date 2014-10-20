@@ -19,6 +19,7 @@
     "lodash": "^2.4.1"
   },
   "devDependencies": {
+    "connect": "^3.3.0",
     "mocha": "^1.21.4"
   }
 }
