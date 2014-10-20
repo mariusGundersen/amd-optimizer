@@ -6,6 +6,7 @@ var print = require('./source/print');
 var moduleTree = require('./source/moduleTree');
 var missingModules = require('./source/missingModules');
 var path = require('path');
+var url = require('url');
 var requirejs = require('requirejs');
 var EventEmitter = require('events').EventEmitter;
 var slash = require('slash');
@@ -51,7 +52,11 @@ module.exports = function(config, options){
             var dependencies = findDependencies(module.defineCall).filter(function(name){
               return !excluded(config, name);
             }).map(function(name){
-              return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
+              if(hasProtocol(config.baseUrl)){
+                return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name};
+              } else {
+                return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name};
+              }
             });
             var name = nameAnonymousModule(module.defineCall, file.name);
           }else{
@@ -71,7 +76,7 @@ module.exports = function(config, options){
           }
           
           pendingModules.add(dependency.name);
-          this.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
+          this.emit('dependency', dependency);
         }, this);
       }
       
@@ -100,6 +105,11 @@ module.exports = function(config, options){
         source: module.file.source
       };
     });
+  }
+
+  // match to "http://", "https://", etc...
+  function hasProtocol(targetUrl){
+    return /^[a-z]+:\/\//.test(targetUrl);
   }
   
 };
