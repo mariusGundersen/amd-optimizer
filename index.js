@@ -53,9 +53,9 @@ module.exports = function(config, options){
               return !excluded(config, name);
             }).map(function(name){
               if(hasProtocol(config.baseUrl)){
-                return {path: url.resolve(config.baseUrl, context.toUrl(name)), name: name};
+                return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name};
               } else {
-                return {path: path.relative(config.baseUrl, context.toUrl(name)), name: name};
+                return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name};
               }
             });
             var name = nameAnonymousModule(module.defineCall, file.name);
@@ -76,11 +76,7 @@ module.exports = function(config, options){
           }
           
           pendingModules.add(dependency.name);
-          if(hasProtocol(config.baseUrl)){
-            this.emit('dependency', {path: url.resolve(config.baseUrl, dependency.path + '.js'), name: dependency.name});
-          } else {
-            this.emit('dependency', {path: path.join(config.baseUrl, dependency.path + '.js'), name: dependency.name});
-          }
+          this.emit('dependency', dependency);
         }, this);
       }
       
