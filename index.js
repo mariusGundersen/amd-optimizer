@@ -17,6 +17,8 @@ module.exports = function(config, options){
   config = config || {};
   options = options || {};
   
+  var toExclude = getExclude(config, options);
+  
   var context = requirejs(config);
   
   var modules = moduleTree();
@@ -52,7 +54,7 @@ module.exports = function(config, options){
 
           if(module.isModule){
             var dependencies = findDependencies(module.defineCall).filter(function(name){
-              return !excluded(config, name);
+              return !excluded(toExclude, name);
             })
             .map(function(name){
               if(hasProtocol(config.baseUrl)){
@@ -118,9 +120,9 @@ module.exports = function(config, options){
   
 };
 
-function excluded(config, name){
+function excluded(exclude, name){
   var path = name.split('/');
-  return 'exclude' in config && config.exclude.some(function(prefix){
+  return exclude.some(function(prefix){
     var prefixPath = prefix.split('/');
     if(prefixPath.length > path.length) return false;
     var startOfPath = _.take(path, prefixPath.length);
@@ -128,4 +130,16 @@ function excluded(config, name){
       return segment[0] === segment[1];
     });
   });
+}
+
+function getExclude(config, options){
+  if('exclude' in config && 'exclude' in options){
+    _.uniq(config.exclude.concat(options.exclude))
+  }else if('exclude' in config){
+    return config.exclude;
+  }else if('exclude' in options){
+    return options.exclude;
+  }else{
+    return [];
+  }
 }
