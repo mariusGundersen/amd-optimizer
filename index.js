@@ -134,7 +134,7 @@ function excluded(exclude, name){
 
 function getExclude(config, options){
   if('exclude' in config && 'exclude' in options){
-    _.uniq(config.exclude.concat(options.exclude))
+    return _.uniq(config.exclude.concat(options.exclude))
   }else if('exclude' in config){
     return config.exclude;
   }else if('exclude' in options){
