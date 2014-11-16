@@ -42,9 +42,11 @@ module.exports = function(config, options){
         this.emit('error', 'File object must contain property relative');
         return;
       }
-            
-      if(modules.isMissing(file.name)){
-        pendingModules.remove(file.name);
+      
+      var filename = slash(file.name);
+      
+      if(modules.isMissing(filename)){
+        pendingModules.remove(filename);
 
         locateModules(parse(file), options.umd).map(function(module){
 
@@ -52,7 +54,6 @@ module.exports = function(config, options){
             var dependencies = findDependencies(module.defineCall).filter(function(name){
               return !excluded(config, name);
             })
-            .map(slash)
             .map(function(name){
               if(hasProtocol(config.baseUrl)){
                 return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name};
@@ -60,12 +61,11 @@ module.exports = function(config, options){
                 return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name};
               }
             });
-            var name = nameAnonymousModule(module.defineCall, file.name);
+            var name = nameAnonymousModule(module.defineCall, filename);
           }else{
             var dependencies = [];
-            var name = file.name;
+            var name = filename;
           }
-
           modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
 
           return dependencies;
@@ -77,8 +77,7 @@ module.exports = function(config, options){
             return;
           }
           
-          pendingModules.add(dependency.name);
-          this.emit('dependency', dependency);
+          pendingModules.add(dependency.name, dependency);
         }, this);
       }
       
@@ -90,6 +89,9 @@ module.exports = function(config, options){
       if(pendingModules.isEmpty()){
         done(optimize());
       }else{
+        pendingModules.forEach(function(module){
+          this.emit('dependency', module);
+        }.bind(this));
         this.on('done', function(){
           done(optimize());
         });
