@@ -51,7 +51,9 @@ module.exports = function(config, options){
           if(module.isModule){
             var dependencies = findDependencies(module.defineCall).filter(function(name){
               return !excluded(config, name);
-            }).map(function(name){
+            })
+            .map(slash)
+            .map(function(name){
               if(hasProtocol(config.baseUrl)){
                 return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name};
               } else {
