@@ -25,6 +25,8 @@ module.exports = function(config, options){
   
   var pendingModules = missingModules();
   
+  var onDone = null;
+  
   return _.extend(new EventEmitter(), {
     addFile: function(err, file){
       
@@ -46,7 +48,6 @@ module.exports = function(config, options){
       }
       
       var filename = slash(file.name);
-      
       if(modules.isMissing(filename)){
         pendingModules.remove(filename);
 
@@ -80,11 +81,14 @@ module.exports = function(config, options){
           }
           
           pendingModules.add(dependency.name, dependency);
+          if(onDone){
+            this.emit('dependency', dependency);
+          }
         }, this);
       }
       
       if(pendingModules.isEmpty()){
-        this.emit('done');
+        onDone && onDone();
       }
     },
     done: function(done){
@@ -94,9 +98,9 @@ module.exports = function(config, options){
         pendingModules.forEach(function(module){
           this.emit('dependency', module);
         }.bind(this));
-        this.on('done', function(){
+        onDone = function(){
           done(optimize());
-        });
+        };
       }
     }
   });
