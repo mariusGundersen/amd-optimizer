@@ -1,6 +1,6 @@
 {
   "name": "amd-optimizer",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,16 +9,16 @@
   "author": "Marius Gundersen",
   "license": "MIT",
   "dependencies": {
-    "recast": "^0.5.16",
+    "recast": "~0.10.12",
     "requirejs": "^2.1.11",
     "toposort": "^0.2.10",
     "ast-traverse": "~0.1.1",
     "strip-bom": "^1.0.0",
-    "vinyl": "~0.4.3",
+    "vinyl": "~0.5.0",
     "slash": "^1.0.0",
-    "lodash": "^2.4.1"
+    "lodash": "~3.9.3"
   },
   "devDependencies": {
-    "mocha": "^1.21.4"
+    "mocha": "~2.2.5"
   }
 }
