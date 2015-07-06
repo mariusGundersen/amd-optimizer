@@ -43,12 +43,20 @@ function isConditionalDefineAndAmd(node){
 function isUmdTest(expression){
   return expression && expression.type === 'LogicalExpression'
       && expression.operator === '&&'
-      && isTypeofFunction(expression.left)
-      && isDefineAmd(expression.right);
+      && (isTypeofFunction(expression.left)
+      || isSecondLevelUmdTest(expression.left)
+      ) && isDefineAmd(expression.right);
+}
+
+function isSecondLevelUmdTest(expression){
+  return expression && expression.type === 'LogicalExpression'
+      && expression.operator === '&&'
+      && isTypeofFunction(expression.left);
 }
 
 function isTypeofFunction(expression){
-  return expression && expression.operator === '==='
+  return expression && expression.type === 'BinaryExpression'
+      && expression.operator === '==='
       && expression.left.type === 'UnaryExpression'
       && expression.left.argument
       && expression.left.argument.type === 'Identifier'
