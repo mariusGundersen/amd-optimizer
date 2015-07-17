@@ -64,6 +64,16 @@ module.exports = function(config, options){
                 return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name};
               }
             });
+
+            if(typeof config.paths === 'object'){
+              for(var key in config.paths){
+                if(config.paths[key] === filename){
+                  filename = key;
+                  break;
+                }
+              }
+            }
+
             var name = nameAnonymousModule(module.defineCall, filename);
           }else{
             var dependencies = [];
