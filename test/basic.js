@@ -21,8 +21,8 @@ describe("Basic dependency sorting", function(){
       loadFile(dependency, base, cwd, optimizer.addFile.bind(optimizer));
     });
 
-    loadFile({path: base + '/test.js', name: 'test'}, base, cwd, function(err, file){
-      optimizer.addFile(err, file);
+    loadFile({path: base + '/test.js', name: 'test'}, base, cwd, function(file){
+      optimizer.addFile(file);
       
       optimizer.done(function(optimized){
         output = optimized;

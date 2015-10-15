@@ -24,8 +24,8 @@ describe("Load through HTTP", function(){
       loadFileFromFakeNet(dependency, base, cwd, optimizer.addFile.bind(optimizer));
     });
 
-    loadFileFromFakeNet({path: base + '/test.js', name: 'test'}, base, cwd, function(err, file){
-      optimizer.addFile(err, file);
+    loadFileFromFakeNet({path: base + '/test.js', name: 'test'}, base, cwd, function(file){
+      optimizer.addFile(file);
 
       optimizer.done(function(optimized){
         output = optimized;

@@ -3,7 +3,7 @@ var File = require('vinyl');
 
 module.exports = function loadFile(dependency, base, cwd, done){
   fs.readFile(dependency.path, function(err, contents){
-    if(err) return done(err);
+    if(err) console.log(err);
     
     var file = new File({
       path: dependency.path,
@@ -12,6 +12,6 @@ module.exports = function loadFile(dependency, base, cwd, done){
       contents: contents
     });
     file.name = dependency.name;
-    done(null, file);
+    done(file);
   });
 }

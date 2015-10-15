@@ -16,7 +16,7 @@ describe("UMD checking", function(){
   files.forEach(function(name){
     it(name + " should have a named module", function(done){
       var fileName = name;
-      loadFile({path: base + '/'+fileName+'.js', name: fileName}, base, cwd, function(err, file){
+      loadFile({path: base + '/'+fileName+'.js', name: fileName}, base, cwd, function(file){
         
         var ast = parse(file);
         var define = locateUmdDefine(ast.program.body[0]);

@@ -28,8 +28,8 @@ describe("require config", function(){
       loadFile(dependency, base, cwd, optimizer.addFile.bind(optimizer));
     });
 
-    loadFile({path: base + '/main.js', name: 'main'}, base, cwd, function(err, file){
-      optimizer.addFile(err, file);
+    loadFile({path: base + '/main.js', name: 'main'}, base, cwd, function(file){
+      optimizer.addFile(file);
 
       optimizer.done(function(optimized){
         output = optimized;

@@ -8,7 +8,7 @@ module.exports = function loadFileFromFakeNet(dependency, base, cwd, done){
   var parsedUrl = url.parse(urlStr);
   var filePath = path.join(cwd, parsedUrl.pathname);
   fs.readFile(filePath, function(err, contents){
-    if(err) return done(err);
+    if(err) console.log(err);
 
     var file = new File({
       path: filePath,
@@ -17,6 +17,6 @@ module.exports = function loadFileFromFakeNet(dependency, base, cwd, done){
       contents: contents
     });
     file.name = dependency.name;
-    done(null, file);
+    done(file);
   });
 }

@@ -28,12 +28,7 @@ module.exports = function(config, options){
   var onDone = null;
   
   return _.extend(new EventEmitter(), {
-    addFile: function(err, file){
-      
-      if(err){
-        this.emit('error', err);
-        return;
-      }      
+    addFile: function(file){
       if('contents' in file == false){
         this.emit('error', 'File object must contain content');
         return;
@@ -103,6 +98,9 @@ module.exports = function(config, options){
           done(optimize());
         };
       }
+    },
+    error: function(err){
+      this.emit('error', err);
     }
   });
   

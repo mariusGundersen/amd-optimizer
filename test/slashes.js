@@ -18,13 +18,13 @@ describe("files with windows slashes", function(done){
       done('it should not fetch dependencies' + dependency.path);
     });
 
-    loadFile({path: base + '/dir/file.js', name: 'dir\\file'}, base, cwd, function(err, file){
+    loadFile({path: base + '/dir/file.js', name: 'dir\\file'}, base, cwd, function(file){
       file.path = file.path.replace(/\//g, '\\');//force windows backwards path separator
-      optimizer.addFile(err, file);
+      optimizer.addFile(file);
       
-      loadFile({path: base + '/dir/dep.js', name: 'dir\\dep'}, base, cwd, function(err, file){
+      loadFile({path: base + '/dir/dep.js', name: 'dir\\dep'}, base, cwd, function(file){
         file.path = file.path.replace(/\//g, '\\');//force windows backwards path separator
-        optimizer.addFile(err, file);
+        optimizer.addFile(file);
         optimizer.done(function(optimized){
           output = optimized;
 

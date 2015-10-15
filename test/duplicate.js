@@ -21,10 +21,10 @@ describe("Duplicate file", function(done){
       loadFile(dependency, base, cwd, optimizer.addFile.bind(optimizer));
     });
 
-    loadFile({path: base + '/test.js', name: 'test'}, base, cwd, function(err, file){
-      optimizer.addFile(err, file);
-      loadFile({path: base + '/add.js', name: 'add'}, base, cwd, function(err, file){        
-        optimizer.addFile(err, file);
+    loadFile({path: base + '/test.js', name: 'test'}, base, cwd, function(file){
+      optimizer.addFile(file);
+      loadFile({path: base + '/add.js', name: 'add'}, base, cwd, function(file){        
+        optimizer.addFile(file);
         
         optimizer.done(function(optimized){
           output = optimized;

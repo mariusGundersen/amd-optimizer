@@ -18,8 +18,8 @@ describe("multiple file", function(done){
       done('it should not fetch dependencies');
     });
 
-    loadFile({path: base + '/multiple.js', name: 'multiple'}, base, cwd, function(err, file){
-      optimizer.addFile(err, file);
+    loadFile({path: base + '/multiple.js', name: 'multiple'}, base, cwd, function(file){
+      optimizer.addFile(file);
       optimizer.done(function(optimized){
         output = optimized;
 
