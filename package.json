@@ -8,6 +8,10 @@
   },
   "author": "Marius Gundersen",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mariusgundersen/amd-optimizer"
+  },
   "dependencies": {
     "recast": "~0.10.33",
     "requirejs": "^2.1.20",
