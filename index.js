@@ -54,22 +54,23 @@ module.exports = function(config, options){
         locateModules(parse(file), options.umd).map(function(module){
 
           if(module.isModule){
+            var moduleName = nameAnonymousModule(module.defineCall, filename);
+            
             var dependencies = findDependencies(module.defineCall).filter(function(name){
               return !excluded(toExclude, name);
             })
             .map(function(name){
               if(hasProtocol(config.baseUrl)){
-                return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name};
+                return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name, requiredBy: moduleName};
               } else {
-                return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name};
+                return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name, requiredBy: moduleName};
               }
             });
-            var name = nameAnonymousModule(module.defineCall, filename);
           }else{
             var dependencies = [];
-            var name = filename;
+            var moduleName = filename;
           }
-          modules.defineModule(name, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
+          modules.defineModule(moduleName, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
 
           return dependencies;
 
