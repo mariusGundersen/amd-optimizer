@@ -27,19 +27,24 @@ function findDefine(node){
       || isConditionalDefineAndAmd(node);
 }
 
+//if(<isUmdTest>){<containsDefineStatement>}
 function isIfDefineAndAmd(node){
-  return node && node.type === 'IfStatement' 
+  return node && node.type === 'IfStatement'
       && isUmdTest(node.test)
       && containsDefineStatement(node.consequent);
 }
 
+//<isUmdTest> ? define
 function isConditionalDefineAndAmd(node){
-  return node && node.type === 'ConditionalExpression' 
+  return node && node.type === 'ConditionalExpression'
       && isUmdTest(node.test)
-      && node.consequent.type === 'Identifier'
-      && node.consequent.name === 'define' && (node.consequent.parent = node, node.consequent);
+      && (node.consequent.type === 'Identifier'
+      && node.consequent.name === 'define'
+      && (node.consequent.parent = node, node.consequent)
+      || isDefineNodeWithArgs(node.consequent));
 }
 
+//<isTypeofFunction> && <isDefineAmd>
 function isUmdTest(expression){
   return expression && expression.type === 'LogicalExpression'
       && expression.operator === '&&'
@@ -54,6 +59,7 @@ function isSecondLevelUmdTest(expression){
       && isTypeofFunction(expression.left);
 }
 
+//typeof define === 'function'
 function isTypeofFunction(expression){
   return expression && expression.type === 'BinaryExpression'
       && expression.operator === '==='
@@ -65,26 +71,31 @@ function isTypeofFunction(expression){
       && expression.right.value === 'function';
 }
 
+//define.amd
+//define['amd']
 function isDefineAmd(expression){
   return expression && expression.type === 'MemberExpression'
       && expression.object && expression.object.type === 'Identifier'
       && expression.object.name === 'define'
       && expression.property
-      && (expression.property.type === 'Identifier' && expression.property.name === 'amd' 
+      && (expression.property.type === 'Identifier' && expression.property.name === 'amd'
       || expression.property.type === 'Literal' && expression.property.value === 'amd' );
 }
 
+//{<isDefineStatement>}
 function containsDefineStatement(statement){
   return statement && statement.type === 'BlockStatement'
       && first(statement.body, isDefineStatement);
 }
 
+//define(...)
 function isDefineStatement(statement){
   return statement && statement.type === 'ExpressionStatement'
       && statement.expression
       && isDefineNodeWithArgs(statement.expression);
 }
 
+//define(...)
 function isDefineNodeWithArgs (node) {
   return node && node.type === 'CallExpression'
       && node.callee && node.callee.type === 'Identifier'

@@ -8,7 +8,7 @@ describe("Basic dependency sorting", function(){
   
   var cwd = __dirname;
   var base = cwd + '/basic/modules';
-  var output = ['umd3', 'umd2', 'umd1', 'add', 'test'];
+  var output = ['add', 'test'];
   
   before(function(done){
     var optimizer = optimize({
@@ -32,12 +32,12 @@ describe("Basic dependency sorting", function(){
     });
   });
   
-  it("should have 5 items", function(){
-    assert.equal(output.length, 5);
+  it("should have 2 items", function(){
+    assert.equal(output.length, 2);
   });
 
   it("should have the test last", function(){
-    assert.equal(output[4].name, 'test');
+    assert.equal(output[1].name, 'test');
   });
 
   output.forEach(function(name){

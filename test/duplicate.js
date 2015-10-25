@@ -8,7 +8,7 @@ describe("Duplicate file", function(done){
   
   var cwd = __dirname;
   var base = cwd + '/basic/modules';
-  var output = ['umd3', 'umd2', 'umd1', 'add', 'test'];
+  var output = ['add', 'test'];
   
   before(function(done){
     var optimizer = optimize({
@@ -23,7 +23,7 @@ describe("Duplicate file", function(done){
 
     loadFile({path: base + '/test.js', name: 'test'}, base, cwd, function(file){
       optimizer.addFile(file);
-      loadFile({path: base + '/add.js', name: 'add'}, base, cwd, function(file){        
+      loadFile({path: base + '/add.js', name: 'add'}, base, cwd, function(file){
         optimizer.addFile(file);
         
         optimizer.done(function(optimized){
@@ -35,12 +35,12 @@ describe("Duplicate file", function(done){
     });
   });
   
-  it("should have 5 items", function(){
-    assert.equal(output.length, 5);
+  it("should have 2 items", function(){
+    assert.equal(output.length, 2);
   });
-
+  
   it("should have the test last", function(){
-    assert.equal(output[4].name, 'test');
+    assert.equal(output[1].name, 'test');
   });
 
   output.forEach(function(name){

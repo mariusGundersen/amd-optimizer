@@ -1,4 +1,4 @@
-define(['umd1'], function(){
+define(function(){
   return function(a, b){
     return a+b;
   };

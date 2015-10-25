@@ -10,7 +10,7 @@ var _ = require('lodash');
 describe("UMD checking", function(){
   
   var cwd = __dirname;
-  var base = cwd + '/basic/modules';
+  var base = cwd + '/umd/modules';
   var files = ['umd1', 'umd2', 'umd3', 'umd4'];
   
   files.forEach(function(name){
@@ -22,7 +22,7 @@ describe("UMD checking", function(){
         var define = locateUmdDefine(ast.program.body[0]);
         nameAnonymousModule(define, fileName);
         var result = print([ast.program.body[0]], fileName).code;
-        assert.equal(result, fs.readFileSync(cwd + '/basic/namedModules/' + fileName + '.js').toString('utf8'));
+        assert.equal(result, fs.readFileSync(cwd + '/umd/namedModules/' + fileName + '.js').toString('utf8'));
         done();
       });
     });
