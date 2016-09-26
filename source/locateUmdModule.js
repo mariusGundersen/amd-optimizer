@@ -1,10 +1,10 @@
 var traverse = require('ast-traverse');
 
 module.exports = function(astExpression){
-  
+
   var hasBeenFound = false;
   var defineCall = null;
-  
+
   traverse(astExpression, {
     pre: function(node, parent, prop, idx){
       var result = findDefine(node);
@@ -17,8 +17,8 @@ module.exports = function(astExpression){
       return hasBeenFound;
     }
   });
-  
-  
+
+
   return defineCall;
 };
 
@@ -30,6 +30,14 @@ function findDefine(node){
 //if(<isUmdTest>){<containsDefineStatement>}
 function isIfDefineAndAmd(node){
   return node && node.type === 'IfStatement'
+      && isUmdTest(node.test)
+      && containsDefineStatement(node.consequent);
+}
+
+//else if(<isUmdTest>){<containsDefineStatement>}
+function isElseIfDefineAndAmd(node){
+  console.log(node.type);
+  return node && node.type === 'ElseIfStatement'
       && isUmdTest(node.test)
       && containsDefineStatement(node.consequent);
 }
@@ -59,16 +67,32 @@ function isSecondLevelUmdTest(expression){
       && isTypeofFunction(expression.left);
 }
 
-//typeof define === 'function'
+//<isTypeofDefine> === <isFunctionLiteral>
+//<isFunctionLiteral> === <isTypeofDefine>
 function isTypeofFunction(expression){
   return expression && expression.type === 'BinaryExpression'
-      && expression.operator === '==='
-      && expression.left.type === 'UnaryExpression'
-      && expression.left.argument
-      && expression.left.argument.type === 'Identifier'
-      && expression.left.argument.name === 'define'
-      && expression.right.type === 'Literal'
-      && expression.right.value === 'function';
+      && (
+           expression.operator === '==='
+        || expression.operator === '=='
+      ) && (
+           (isTypeofDefine(expression.left) && isFunctionLiteral(expression.right))
+        || (isTypeofDefine(expression.right) && isFunctionLiteral(expression.left))
+      );
+}
+
+//typeof define
+function isTypeofDefine(expression){
+  return expression.type === 'UnaryExpression'
+      && expression.operator === 'typeof'
+      && expression.argument
+      && expression.argument.type === 'Identifier'
+      && expression.argument.name === 'define';
+}
+
+//'function'
+function isFunctionLiteral(expression){
+  return expression.type === 'Literal'
+      && expression.value === 'function';
 }
 
 //define.amd
@@ -84,8 +108,9 @@ function isDefineAmd(expression){
 
 //{<isDefineStatement>}
 function containsDefineStatement(statement){
-  return statement && statement.type === 'BlockStatement'
-      && first(statement.body, isDefineStatement);
+  return statement && (
+         (statement.type === 'BlockStatement' && first(statement.body, isDefineStatement))
+      || isDefineStatement(statement));
 }
 
 //define(...)
