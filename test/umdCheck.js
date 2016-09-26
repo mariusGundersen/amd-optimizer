@@ -8,16 +8,16 @@ var loadFile = require('./utils/loadFile');
 var _ = require('lodash');
 
 describe("UMD checking", function(){
-  
+
   var cwd = __dirname;
   var base = cwd + '/umd/modules';
-  var files = ['umd1', 'umd2', 'umd3', 'umd4'];
-  
+  var files = ['umd1', 'umd2', 'umd3', 'umd4', 'umd-bluebird'];
+
   files.forEach(function(name){
     it(name + " should have a named module", function(done){
       var fileName = name;
       loadFile({path: base + '/'+fileName+'.js', name: fileName}, base, cwd, function(file){
-        
+
         var ast = parse(file);
         var define = locateUmdDefine(ast.program.body[0]);
         nameAnonymousModule(define, fileName);
