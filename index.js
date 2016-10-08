@@ -13,20 +13,20 @@ var slash = require('slash');
 var _ = require('lodash');
 
 module.exports = function(config, options){
-  
+
   config = config || {};
   options = options || {};
-  
+
   var toExclude = getExclude(config, options);
-  
+
   var context = requirejs(config);
-  
+
   var modules = moduleTree();
-  
+
   var pendingModules = missingModules();
-  
+
   var onDone = null;
-  
+
   return _.extend(new EventEmitter(), {
     addFile: function(file){
       if('contents' in file == false){
@@ -41,7 +41,7 @@ module.exports = function(config, options){
         this.emit('error', 'File object must contain property relative');
         return;
       }
-      
+
       var filename = slash(file.name);
       if(modules.isMissing(filename)){
         pendingModules.remove(filename);
@@ -50,7 +50,7 @@ module.exports = function(config, options){
 
           if(module.isModule){
             var moduleName = nameAnonymousModule(module.defineCall, filename);
-            
+
             var dependencies = findDependencies(module.defineCall).filter(function(name){
               return !excluded(toExclude, name);
             })
@@ -75,14 +75,14 @@ module.exports = function(config, options){
           if(modules.has(dependency.name) || pendingModules.has(dependency.name)){
             return;
           }
-          
+
           pendingModules.add(dependency.name, dependency);
           if(onDone){
             this.emit('dependency', dependency);
           }
         }, this);
       }
-      
+
       if(pendingModules.isEmpty()){
         onDone && onDone();
       }
@@ -103,10 +103,10 @@ module.exports = function(config, options){
       this.emit('error', err);
     }
   });
-  
+
   function optimize(){
     return modules.leafToRoot().map(function(module){
-      var code = print(module.source, module.name);
+      var code = print(module.source, module.name, module.sourceMap);
       return {
         content: code.code,
         map: code.map,
@@ -120,7 +120,7 @@ module.exports = function(config, options){
   function hasProtocol(targetUrl){
     return /^[a-z]+:\/\//.test(targetUrl);
   }
-  
+
 };
 
 function excluded(exclude, name){
