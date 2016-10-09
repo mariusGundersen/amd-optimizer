@@ -106,7 +106,7 @@ module.exports = function(config, options){
 
   function optimize(){
     return modules.leafToRoot().map(function(module){
-      var code = print(module.source, module.name, module.sourceMap);
+      var code = print(module.source, module.name, module.file.sourceMap);
       return {
         content: code.code,
         map: code.map,
