@@ -111,7 +111,8 @@ module.exports = function(config, options){
         content: code.code,
         map: code.map,
         name: slash(module.name),
-        source: module.file.source
+        source: module.file.source,
+        file: module.file
       };
     });
   }
