@@ -1,37 +1,27 @@
-var fs = require('fs');
-var optimize = require('../index.js');
-var assert = require('assert');
-var loadFile = require('./utils/loadFile');
-var _ = require('lodash');
+const fs = require('fs');
+const optimize = require('../index.js');
+const assert = require('assert');
+const loadFile = require('./utils/loadFile');
+const _ = require('lodash');
 
 describe("Basic dependency sorting", function(){
-  
-  var cwd = __dirname;
-  var base = cwd + '/basic/modules';
-  var output = ['add', 'test'];
-  
-  before(function(done){
-    var optimizer = optimize({
+
+  const cwd = __dirname;
+  const base = cwd + '/basic/modules';
+  let output = ['add', 'test'];
+
+  before(async function(){
+    const optimizer = optimize({
       baseUrl: base
     }, {
       umd: true
     });
 
-    optimizer.on('dependency', function(dependency){
-      loadFile(dependency, base, cwd, optimizer.addFile.bind(optimizer));
-    });
+    optimizer.addFile(await loadFile({path: base + '/test.js', name: 'test'}, base, cwd));
 
-    loadFile({path: base + '/test.js', name: 'test'}, base, cwd, function(file){
-      optimizer.addFile(file);
-      
-      optimizer.done(function(optimized){
-        output = optimized;
-      
-        done();
-      });
-    });
+    output = await optimizer.done(dep => loadFile(dep, base, cwd));
   });
-  
+
   it("should have 2 items", function(){
     assert.equal(output.length, 2);
   });

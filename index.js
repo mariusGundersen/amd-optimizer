@@ -1,112 +1,93 @@
-var parse = require('./source/parse');
-var locateModules = require('./source/locateModules');
-var findDependencies = require('./source/findDependencies');
-var nameAnonymousModule = require('./source/nameAnonymousModule');
-var print = require('./source/print');
-var moduleTree = require('./source/moduleTree');
-var missingModules = require('./source/missingModules');
-var path = require('path');
-var url = require('url');
-var requirejs = require('requirejs');
-var EventEmitter = require('events').EventEmitter;
-var slash = require('slash');
-var _ = require('lodash');
+const parse = require('./source/parse');
+const locateModules = require('./source/locateModules');
+const findDependencies = require('./source/findDependencies');
+const nameAnonymousModule = require('./source/nameAnonymousModule');
+const print = require('./source/print');
+const ModuleTree = require('./source/ModuleTree');
+const MissingModules = require('./source/MissingModules');
+const path = require('path');
+const url = require('url');
+const requirejs = require('requirejs');
+const EventEmitter = require('events').EventEmitter;
+const slash = require('slash');
+const _ = require('lodash');
 
 module.exports = function(config, options){
 
   config = config || {};
   options = options || {};
 
-  var toExclude = getExclude(config, options);
+  const toExclude = getExclude(config, options);
 
-  var context = requirejs(config);
+  const context = requirejs(config);
 
-  var modules = moduleTree();
+  const modules = new ModuleTree();
 
-  var pendingModules = missingModules();
+  const pendingModules = new MissingModules();
 
-  var onDone = null;
+  const onDone = null;
 
-  return _.extend(new EventEmitter(), {
+  return {
     addFile: function(file){
       if('contents' in file == false){
-        this.emit('error', 'File object must contain content');
-        return;
+        throw new Error('File object must contain content');
       }
       if('name' in file == false){
-        this.emit('error', 'File object must contain property name');
-        return;
+        throw new Error('File object must contain property name');
       }
       if('relative' in file == false){
-        this.emit('error', 'File object must contain property relative');
-        return;
+        throw new Error('File object must contain property relative');
       }
 
-      var filename = slash(file.name);
-      if(modules.isMissing(filename)){
-        pendingModules.remove(filename);
+      const filename = slash(file.name);
+      if(!modules.isMissing(filename)) return;
 
-        locateModules(parse(file), options.umd).map(function(module){
+      pendingModules.remove(filename);
 
-          if(module.isModule){
-            var moduleName = nameAnonymousModule(module.defineCall, filename);
+      const dependencies = locateModules(parse(file), options.umd)
+      .map(function(module){
 
-            var dependencies = findDependencies(module.defineCall).filter(function(name){
-              return !excluded(toExclude, name);
-            })
-            .map(function(name){
-              if(hasProtocol(config.baseUrl)){
-                return {path: url.resolve(config.baseUrl, context.toUrl(name)) + '.js', name: name, requiredBy: moduleName};
-              } else {
-                return {path: path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js', name: name, requiredBy: moduleName};
-              }
-            });
-          }else{
-            var dependencies = [];
-            var moduleName = filename;
-          }
-          modules.defineModule(moduleName, module.rootAstNode, dependencies.map(function(dep){ return dep.name; }), file);
+        if(!module.isModule){
+          modules.defineModule(filename, module.rootAstNode, [], file);
+          return [];
+        }
 
-          return dependencies;
+        const moduleName = nameAnonymousModule(module.defineCall, filename);
 
-        }).reduce(function(a, b){
-          return a.concat(b);
-        }, []).forEach(function(dependency){
-          if(modules.has(dependency.name) || pendingModules.has(dependency.name)){
-            return;
-          }
+        const dependencies = findDependencies(module.defineCall)
+        .filter(name => !excluded(toExclude, name))
+        .map(name => ({
+          name,
+          requiredBy: moduleName,
+          path: hasProtocol(config.baseUrl)
+            ? url.resolve(config.baseUrl, context.toUrl(name)) + '.js'
+            : path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js'
+        }));
 
-          pendingModules.add(dependency.name, dependency);
-          if(onDone){
-            this.emit('dependency', dependency);
-          }
-        }, this);
-      }
+        modules.defineModule(moduleName, module.rootAstNode, dependencies.map(dep => dep.name), file);
+        return dependencies;
+      })
+      .reduce(flatmap)
+      .filter(dep => !modules.has(dep.name)
+                  && !pendingModules.has(dep.name));
 
-      if(pendingModules.isEmpty()){
-        onDone && onDone();
-      }
+      pendingModules.add(dependencies);
     },
-    done: function(done){
-      if(pendingModules.isEmpty()){
-        done(optimize());
-      }else{
-        pendingModules.forEach(function(module){
-          this.emit('dependency', module);
-        }.bind(this));
-        onDone = function(){
-          done(optimize());
-        };
+    done: async function(loadFile){
+      while(!pendingModules.isEmpty()){
+        const files = await Promise.all(pendingModules.map(m => loadFile(m)));
+        for(const file of files){
+          this.addFile(file);
+        }
       }
-    },
-    error: function(err){
-      this.emit('error', err);
+
+      return optimize();
     }
-  });
+  };
 
   function optimize(){
     return modules.leafToRoot().map(function(module){
-      var code = print(module.source, module.name, module.file.sourceMap);
+      const code = print(module.source, module.name, module.file.sourceMap);
       return {
         content: code.code,
         map: code.map,
@@ -125,14 +106,13 @@ module.exports = function(config, options){
 };
 
 function excluded(exclude, name){
-  var path = name.split('/');
+  const path = name.split('/');
   return exclude.some(function(prefix){
-    var prefixPath = prefix.split('/');
+    const prefixPath = prefix.split('/');
     if(prefixPath.length > path.length) return false;
-    var startOfPath = _.take(path, prefixPath.length);
-    return _.zip(startOfPath, prefixPath).every(function(segment){
-      return segment[0] === segment[1];
-    });
+    const startOfPath = _.take(path, prefixPath.length);
+    return _.zip(startOfPath, prefixPath)
+      .every(segment => segment[0] === segment[1]);
   });
 }
 
@@ -146,4 +126,8 @@ function getExclude(config, options){
   }else{
     return [];
   }
+}
+
+function flatmap(a, b){
+  return (a || []).concat(b || []);
 }

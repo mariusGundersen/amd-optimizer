@@ -1,48 +1,42 @@
-var toposort = require('toposort');
+const toposort = require('toposort');
 
-module.exports = function(){
-  
-  var modules = Object.create(null);
-  
-  return {    
-    defineModule: function(name, source, dependencies, file){
-      modules[name] = {
-        name: name,
-        source: name in modules ? modules[name].source.concat([source]) : [source],
-        dependencies: dependencies,
-        file: file
-      };
-    },
-    
-    has: function(name){
-      return name in modules;
-    },
-    
-    isMissing: function(name){
-      return !this.has(name);
-    },
-    
-    leafToRoot: function(){
-      var edges = [];
-      var nodes = [];
-      
-      for(var name in modules){
-        if(modules[name].dependencies.length > 0){
-          edges = edges.concat(modules[name].dependencies.map(function(dep){
-            return [name, dep];
-          }));
-        }
-        nodes.push(name);
+module.exports = class ModuleTree {
+  constructor(){
+    this.modules = new Map();
+  }
+
+  defineModule(name, source, dependencies, file){
+    this.modules.set(name, {
+      name: name,
+      source: this.modules.has(name) ? this.modules.get(name).source.concat([source]) : [source],
+      dependencies: dependencies,
+      file: file
+    });
+  }
+
+  has(name){
+    return this.modules.has(name);
+  }
+
+  isMissing(name){
+    return !this.has(name);
+  }
+
+  leafToRoot(){
+    const edges = [];
+    const nodes = [];
+
+    for(const [name, module] of this.modules){
+      if(module.dependencies.length > 0){
+        edges.push(...module.dependencies.map(dep => [name, dep]));
       }
-      
-      return toposort.array(nodes, edges)
-      .reverse()
-      .filter(function(name){
-        return name in modules;
-      }).map(function(name){
-        return modules[name];
-      });
+      nodes.push(name);
     }
-  };
-  
+
+    return toposort.array(nodes, edges)
+    .reverse()
+    .filter(name => this.modules.has(name))
+    .map(name => this.modules.get(name));
+  }
+
 };

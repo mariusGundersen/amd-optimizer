@@ -1,9 +1,9 @@
-var B = require('recast').types.builders;
-var path = require('path');
+const B = require('recast').types.builders;
+const path = require('path');
 
 module.exports = function(defineCall, filename){
   if(defineCall.type === 'CallExpression'){
-    if(defineCall.arguments[0].type == 'Literal'){
+    if(defineCall.arguments.length > 0 && defineCall.arguments[0].type == 'Literal'){
       return defineCall.arguments[0].value
     }else{
       if(defineCall.callee.name == 'define'){

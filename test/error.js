@@ -1,21 +1,51 @@
-var assert = require('assert');
-var optimize = require('../index.js');
+const assert = require('assert');
+const optimize = require('../index.js');
 describe("handle error", function(){
 
 
-  before(function(done){
-    var optimizer = optimize({
+  it("should throw an error when the file is undefined", function(){
+    const optimizer = optimize({
       baseUrl: '.'
     });
-    
-    optimizer.on('error', function(msg){
-      done();
-    });
-    
-    optimizer.error("oh noes");
+
+    assert.throws(() => optimizer.addFile());
   });
 
-  it("it should emit the error", function(){
-    assert.ok(true);
+  it("should throw an error when the file is missing contents", function(){
+    const optimizer = optimize({
+      baseUrl: '.'
+    });
+
+    assert.throws(() => optimizer.addFile({}));
+  });
+
+  it("should throw an error when the file is missing name", function(){
+    const optimizer = optimize({
+      baseUrl: '.'
+    });
+
+    assert.throws(() => optimizer.addFile({contents: 'blabla'}));
+  });
+
+  it("should throw an error when the file is missing relative", function(){
+    const optimizer = optimize({
+      baseUrl: '.'
+    });
+
+    assert.throws(() => optimizer.addFile({contents: 'blabla', name: 'blabla'}));
+  });
+
+  it("should throw an error when loadFile rejects", async function(){
+    const optimizer = optimize({
+      baseUrl: '.'
+    });
+
+    optimizer.addFile({contents: 'define(["file"], function(){})', name: 'dummy', relative: 'dummy.js'});
+
+    try{
+      const result = await optimizer.done(() => Promise.reject(new Error('oh noes')));
+    }catch(e){
+      assert.ok(true);
+    }
   });
 });

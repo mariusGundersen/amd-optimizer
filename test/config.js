@@ -1,16 +1,16 @@
-var fs = require('fs');
-var optimize = require('../index.js');
-var assert = require('assert');
-var loadFile = require('./utils/loadFile');
+const fs = require('fs');
+const optimize = require('../index.js');
+const assert = require('assert');
+const loadFile = require('./utils/loadFile');
 
 describe("require config", function(){
 
-  var cwd = __dirname;
-  var base = cwd + '/config/src';
-  var output;
-  
-  before(function(done){
-    var optimizer = optimize({
+  const cwd = __dirname;
+  const base = cwd + '/config/src';
+  let output;
+
+  before(async function(){
+    const optimizer = optimize({
       baseUrl: base,
       paths: {
         jQuery: '../lib/jQuery',
@@ -24,21 +24,11 @@ describe("require config", function(){
       umd: true
     });
 
-    optimizer.on('dependency', function(dependency){
-      loadFile(dependency, base, cwd, optimizer.addFile.bind(optimizer));
-    });
+    optimizer.addFile(await loadFile({path: base + '/main.js', name: 'main'}, base, cwd));
 
-    loadFile({path: base + '/main.js', name: 'main'}, base, cwd, function(file){
-      optimizer.addFile(file);
-
-      optimizer.done(function(optimized){
-        output = optimized;
-      
-        done();
-      });
-    });
+    output = await optimizer.done(dep => loadFile(dep, base, cwd));
   });
-  
+
   it("should have 2 items", function(){
     assert.equal(output.length, 2);
   });

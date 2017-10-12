@@ -1,19 +1,19 @@
-var traverse = require('ast-traverse');
+const traverse = require('ast-traverse');
 
 module.exports = function(astExpression){
 
-  var hasBeenFound = false;
-  var defineCall = null;
+  let hasBeenFound = false;
+  let defineCall = null;
 
   traverse(astExpression, {
-    pre: function(node, parent, prop, idx){
-      var result = findDefine(node);
+    pre(node, parent, prop, idx){
+      const result = findDefine(node);
       if(result){
         hasBeenFound = true;
         defineCall = result;
       }
     },
-    skipProperty: function(){
+    skipProperty(){
       return hasBeenFound;
     }
   });
@@ -128,8 +128,8 @@ function isDefineNodeWithArgs (node) {
 }
 
 function first(array, func){
-  for(var i=0; i<array.length; i++){
-    var result = func(array[i]);
+  for(const entry of array){
+    const result = func(entry);
     if(result) return result;
   }
   return null;

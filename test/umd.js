@@ -1,48 +1,34 @@
-var fs = require('fs');
-var optimize = require('../index.js');
-var assert = require('assert');
-var loadFile = require('./utils/loadFile');
-var _ = require('lodash');
+const fs = require('fs');
+const optimize = require('../index.js');
+const assert = require('assert');
+const loadFile = require('./utils/loadFile');
+const _ = require('lodash');
 
 describe("Naming umd modules", function(){
-  
-  var cwd = __dirname;
-  var base = cwd + '/umd/modules';
-  var output = ['umd1', 'umd2', 'umd3', 'umd4'];
-  
-  before(function(done){
-    var optimizer = optimize({
+
+  const cwd = __dirname;
+  const base = cwd + '/umd/modules';
+  let output = ['umd1', 'umd2', 'umd3', 'umd4'];
+
+  before(async function(){
+    const optimizer = optimize({
       baseUrl: base
     }, {
       umd: true
     });
 
-    optimizer.on('dependency', function(dependency){
-      loadFile(dependency, base, cwd, optimizer.addFile.bind(optimizer));
-    });
-    
-    Promise.all(output.map(function(name){
-      return {
+    const files = await Promise.all(output.map(name => loadFile({
         name: name,
-        path: base+'/'+name+'.js',
-        base: base,
-        cwd: cwd
-      };
-    }).map(load))
-    .then(function(files){
-      files.map(function(file){
-        optimizer.addFile(file);
-      });
-      optimizer.done(function(optimized){
-        output = optimized;
-      
-        done();
-      });
-    }).catch(function(err){
-      done(err);
-    });
+        path: base+'/'+name+'.js'
+      }, base, cwd)));
+
+    for(const file of files){
+      optimizer.addFile(file);
+    }
+
+    output = await optimizer.done(dep => loadFile(dep, base, cwd));
   });
-  
+
   it("should have 4 items", function(){
     assert.equal(output.length, 4);
   });
@@ -53,12 +39,3 @@ describe("Naming umd modules", function(){
     });
   });
 });
-
-
-function load(file){
-  return new Promise(function(resolve, reject){
-    loadFile(file, file.base, file.cwd, function(file){
-      resolve(file);
-    });
-  });
-}

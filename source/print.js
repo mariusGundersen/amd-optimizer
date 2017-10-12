@@ -1,5 +1,5 @@
-var typeBuilders = require('recast').types.builders;
-var recast = require('recast');
+const typeBuilders = require('recast').types.builders;
+const recast = require('recast');
 
 module.exports = function(source, name, initialSourceMap){
   return recast.print(

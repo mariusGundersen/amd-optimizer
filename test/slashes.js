@@ -1,39 +1,30 @@
-var fs = require('fs');
-var optimize = require('../index.js');
-var assert = require('assert');
-var loadFile = require('./utils/loadFile');
+const fs = require('fs');
+const optimize = require('../index.js');
+const assert = require('assert');
+const loadFile = require('./utils/loadFile');
 
-describe("files with windows slashes", function(done){
-  
-  var cwd = __dirname;
-  var base = cwd + '/slashes';
-  var output = ['dep', 'multiple'];
-  
-  before(function(done){
-    var optimizer = optimize({
+describe("files with windows slashes", function(){
+
+  const cwd = __dirname;
+  const base = cwd + '/slashes';
+  let output = ['dep', 'multiple'];
+
+  before(async function(){
+    const optimizer = optimize({
       baseUrl: base
     });
 
-    optimizer.on('dependency', function(dependency){
-      done('it should not fetch dependencies' + dependency.path);
-    });
+    let file = await loadFile({path: base + '/dir/file.js', name: 'dir\\file'}, base, cwd);
+    file.path = file.path.replace(/\//g, '\\');//force windows backwards path separator
+    optimizer.addFile(file);
 
-    loadFile({path: base + '/dir/file.js', name: 'dir\\file'}, base, cwd, function(file){
-      file.path = file.path.replace(/\//g, '\\');//force windows backwards path separator
-      optimizer.addFile(file);
-      
-      loadFile({path: base + '/dir/dep.js', name: 'dir\\dep'}, base, cwd, function(file){
-        file.path = file.path.replace(/\//g, '\\');//force windows backwards path separator
-        optimizer.addFile(file);
-        optimizer.done(function(optimized){
-          output = optimized;
+    file = await loadFile({path: base + '/dir/dep.js', name: 'dir\\dep'}, base, cwd);
+    file.path = file.path.replace(/\//g, '\\');//force windows backwards path separator
+    optimizer.addFile(file);
 
-          done();
-        });
-      });
-    });
+    output = await optimizer.done(m => Promise.reject('it should not fetch dependencies'));
   });
-  
+
   it("should have 2 items", function(){
     assert.equal(output.length, 2);
   });

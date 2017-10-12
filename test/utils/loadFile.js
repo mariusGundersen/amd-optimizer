@@ -1,10 +1,10 @@
 var fs = require('fs');
 var File = require('vinyl');
 
-module.exports = function loadFile(dependency, base, cwd, done){
-  fs.readFile(dependency.path, function(err, contents){
-    if(err) console.log(err);
-    
+module.exports = function loadFile(dependency, base, cwd){
+  return new Promise((res, rej) => fs.readFile(dependency.path, function(err, contents){
+    if(err) return rej(err);
+
     var file = new File({
       path: dependency.path,
       cwd: cwd,
@@ -12,6 +12,6 @@ module.exports = function loadFile(dependency, base, cwd, done){
       contents: contents
     });
     file.name = dependency.name;
-    done(file);
-  });
+    res(file);
+  }));
 }

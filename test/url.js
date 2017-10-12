@@ -1,38 +1,28 @@
-// This script is based on test/basic.js
-var fs = require('fs');
-var optimize = require('../index.js');
-var assert = require('assert');
-var loadFileFromFakeNet = require('./utils/loadFileFromFakeNet');
-var _ = require('lodash');
-var path = require('path');
-var url = require('url');
+const fs = require('fs');
+const optimize = require('../index.js');
+const assert = require('assert');
+const loadFileFromFakeNet = require('./utils/loadFileFromFakeNet');
+const _ = require('lodash');
+const path = require('path');
+const url = require('url');
 
 describe("Load through HTTP", function(){
 
-  var cwd = __dirname;
-  var base = 'http://url/basic/modules';
-  var output = ['add', 'test'];
+  const cwd = __dirname;
+  const base = 'http://url/basic/modules';
+  let output = ['add', 'test'];
 
-  before(function(done){
-    var optimizer = optimize({
+  before(async function(){
+    const optimizer = optimize({
       baseUrl: base
     }, {
       umd: true
     });
 
-    optimizer.on('dependency', function(dependency){
-      loadFileFromFakeNet(dependency, base, cwd, optimizer.addFile.bind(optimizer));
-    });
+    const file = await loadFileFromFakeNet({path: base + '/test.js', name: 'test'}, base, cwd);
+    optimizer.addFile(file);
 
-    loadFileFromFakeNet({path: base + '/test.js', name: 'test'}, base, cwd, function(file){
-      optimizer.addFile(file);
-
-      optimizer.done(function(optimized){
-        output = optimized;
-
-        done();
-      });
-    });
+    output = await optimizer.done(dep => loadFileFromFakeNet(dep, base, cwd));
   });
 
   it("should have 2 items", function(){

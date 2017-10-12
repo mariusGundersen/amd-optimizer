@@ -1,4 +1,4 @@
-var locateUmdDefine = require('./locateUmdModule');
+const locateUmdDefine = require('./locateUmdModule');
 
 
 function isDefineNodeWithArgs (node) {
@@ -17,11 +17,11 @@ function isRequireNodeWithArgs (node) {
 
 
 module.exports = function(ast, locateUmd){
-  
-  var topLevel = ast.program.body;
-    
+
+  const topLevel = ast.program.body;
+
   return topLevel.map(function(node){
-        
+
     if(isDefineNodeWithArgs(node.expression) || isRequireNodeWithArgs(node.expression)){
       return {
         isModule: true,
@@ -29,8 +29,8 @@ module.exports = function(ast, locateUmd){
         defineCall: node.expression
       }
     }else if(locateUmd){
-      var defineCall = locateUmdDefine(node.expression);
-      
+      const defineCall = locateUmdDefine(node.expression);
+
       return {
         isModule: defineCall != null,
         rootAstNode: node,
@@ -43,7 +43,7 @@ module.exports = function(ast, locateUmd){
         defineCall: null
       }
     }
-    
+
   });
-  
+
 };

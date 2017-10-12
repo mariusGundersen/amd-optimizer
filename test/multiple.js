@@ -1,33 +1,23 @@
-var fs = require('fs');
-var optimize = require('../index.js');
-var assert = require('assert');
-var loadFile = require('./utils/loadFile');
+const fs = require('fs');
+const optimize = require('../index.js');
+const assert = require('assert');
+const loadFile = require('./utils/loadFile');
 
-describe("multiple file", function(done){
-  
-  var cwd = __dirname;
-  var base = cwd + '/multiple';
-  var output = ['dep', 'multiple'];
-  
-  before(function(done){
-    var optimizer = optimize({
+describe("multiple file", function(){
+
+  const cwd = __dirname;
+  const base = cwd + '/multiple';
+  let output = ['dep', 'multiple'];
+
+  before(async function(){
+    const optimizer = optimize({
       baseUrl: base
     });
 
-    optimizer.on('dependency', function(dependency){
-      done('it should not fetch dependencies');
-    });
-
-    loadFile({path: base + '/multiple.js', name: 'multiple'}, base, cwd, function(file){
-      optimizer.addFile(file);
-      optimizer.done(function(optimized){
-        output = optimized;
-
-        done();
-      });
-    });
+    optimizer.addFile(await loadFile({path: base + '/multiple.js', name: 'multiple'}, base, cwd));
+    output = await optimizer.done(m => Promise.reject('it should not fetch dependencies'));
   });
-  
+
   it("should have 2 items", function(){
     assert.equal(output.length, 2);
   });
@@ -38,5 +28,5 @@ describe("multiple file", function(done){
 
   it("should have the multiple last", function(){
     assert.equal(output[1].name, 'multiple');
-  });  
+  });
 });
