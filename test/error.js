@@ -1,5 +1,5 @@
 const assert = require('assert');
-const optimize = require('../index.js');
+const optimize = require('../dest/index.js').default;
 describe("handle error", function(){
 
 

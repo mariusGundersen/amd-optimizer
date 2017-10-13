@@ -1,18 +1,32 @@
-const parse = require('./source/parse');
-const locateModules = require('./source/locateModules');
-const findDependencies = require('./source/findDependencies');
-const nameAnonymousModule = require('./source/nameAnonymousModule');
-const print = require('./source/print');
-const ModuleTree = require('./source/ModuleTree');
-const MissingModules = require('./source/MissingModules');
-const path = require('path');
-const url = require('url');
-const requirejs = require('requirejs');
-const EventEmitter = require('events').EventEmitter;
-const slash = require('slash');
-const _ = require('lodash');
+import parse from './parse';
+import locateModules from './locateModules';
+import findDependencies from './findDependencies';
+import nameAnonymousModule from './nameAnonymousModule';
+import print from './print';
+import ModuleTree from './ModuleTree';
+import MissingModules from './MissingModules';
+import * as path from 'path';
+import * as url from 'url';
+import * as requirejs from 'requirejs';
+import * as slash from 'slash';
+import * as _ from 'lodash';
 
-module.exports = function(config, options){
+import { Module, Dependency, File } from './types';
+
+export interface Config {
+  readonly baseUrl : string
+  readonly exclude? : string[]
+
+}
+
+export interface Options {
+  readonly umd? : boolean
+  readonly exclude? : string[]
+}
+
+export type LoadFile = (Dependency : Dependency) => File
+
+export default function(config : Config, options : Options){
 
   config = config || {};
   options = options || {};
@@ -28,7 +42,7 @@ module.exports = function(config, options){
   const onDone = null;
 
   return {
-    addFile: function(file){
+    addFile: function(file : File){
       if('contents' in file == false){
         throw new Error('File object must contain content');
       }
@@ -73,7 +87,7 @@ module.exports = function(config, options){
 
       pendingModules.add(dependencies);
     },
-    done: async function(loadFile){
+    done: async function(loadFile : LoadFile){
       while(!pendingModules.isEmpty()){
         const files = await Promise.all(pendingModules.map(m => loadFile(m)));
         for(const file of files){
@@ -99,13 +113,13 @@ module.exports = function(config, options){
   }
 
   // match to "http://", "https://", etc...
-  function hasProtocol(targetUrl){
+  function hasProtocol(targetUrl : string){
     return /^[a-z]+:\/\//.test(targetUrl);
   }
 
 };
 
-function excluded(exclude, name){
+function excluded(exclude : string[], name : string){
   const path = name.split('/');
   return exclude.some(function(prefix){
     const prefixPath = prefix.split('/');
@@ -116,18 +130,18 @@ function excluded(exclude, name){
   });
 }
 
-function getExclude(config, options){
-  if('exclude' in config && 'exclude' in options){
+function getExclude(config : Config, options : Options){
+  if('exclude' in config && config.exclude && 'exclude' in options && options.exclude){
     return _.uniq(config.exclude.concat(options.exclude))
-  }else if('exclude' in config){
+  }else if('exclude' in config && config.exclude){
     return config.exclude;
-  }else if('exclude' in options){
+  }else if('exclude' in options && options.exclude){
     return options.exclude;
   }else{
     return [];
   }
 }
 
-function flatmap(a, b){
+function flatmap<T>(a? : T[], b? : T[]){
   return (a || []).concat(b || []);
 }

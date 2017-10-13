@@ -1,12 +1,12 @@
-const traverse = require('ast-traverse');
+import * as traverse from 'ast-traverse';
 
-module.exports = function(astExpression){
+export default function locateUmdModule(astExpression : {}){
 
   let hasBeenFound = false;
   let defineCall = null;
 
   traverse(astExpression, {
-    pre(node, parent, prop, idx){
+    pre(node : any){
       const result = findDefine(node);
       if(result){
         hasBeenFound = true;
@@ -22,20 +22,20 @@ module.exports = function(astExpression){
   return defineCall;
 };
 
-function findDefine(node){
+function findDefine(node : any){
   return isIfDefineAndAmd(node)
       || isConditionalDefineAndAmd(node);
 }
 
 //if(<isUmdTest>){<containsDefineStatement>}
-function isIfDefineAndAmd(node){
+function isIfDefineAndAmd(node : any){
   return node && node.type === 'IfStatement'
       && isUmdTest(node.test)
       && containsDefineStatement(node.consequent);
 }
 
 //else if(<isUmdTest>){<containsDefineStatement>}
-function isElseIfDefineAndAmd(node){
+function isElseIfDefineAndAmd(node : any){
   console.log(node.type);
   return node && node.type === 'ElseIfStatement'
       && isUmdTest(node.test)
@@ -43,7 +43,7 @@ function isElseIfDefineAndAmd(node){
 }
 
 //<isUmdTest> ? define
-function isConditionalDefineAndAmd(node){
+function isConditionalDefineAndAmd(node : any){
   return node && node.type === 'ConditionalExpression'
       && isUmdTest(node.test)
       && (node.consequent.type === 'Identifier'
@@ -53,7 +53,7 @@ function isConditionalDefineAndAmd(node){
 }
 
 //<isTypeofFunction> && <isDefineAmd>
-function isUmdTest(expression){
+function isUmdTest(expression : any){
   return expression && expression.type === 'LogicalExpression'
       && expression.operator === '&&'
       && (isTypeofFunction(expression.left)
@@ -61,7 +61,7 @@ function isUmdTest(expression){
       ) && isDefineAmd(expression.right);
 }
 
-function isSecondLevelUmdTest(expression){
+function isSecondLevelUmdTest(expression : any){
   return expression && expression.type === 'LogicalExpression'
       && expression.operator === '&&'
       && isTypeofFunction(expression.left);
@@ -69,7 +69,7 @@ function isSecondLevelUmdTest(expression){
 
 //<isTypeofDefine> === <isFunctionLiteral>
 //<isFunctionLiteral> === <isTypeofDefine>
-function isTypeofFunction(expression){
+function isTypeofFunction(expression : any){
   return expression && expression.type === 'BinaryExpression'
       && (
            expression.operator === '==='
@@ -81,7 +81,7 @@ function isTypeofFunction(expression){
 }
 
 //typeof define
-function isTypeofDefine(expression){
+function isTypeofDefine(expression : any){
   return expression.type === 'UnaryExpression'
       && expression.operator === 'typeof'
       && expression.argument
@@ -90,14 +90,14 @@ function isTypeofDefine(expression){
 }
 
 //'function'
-function isFunctionLiteral(expression){
+function isFunctionLiteral(expression : any){
   return expression.type === 'Literal'
       && expression.value === 'function';
 }
 
 //define.amd
 //define['amd']
-function isDefineAmd(expression){
+function isDefineAmd(expression : any){
   return expression && expression.type === 'MemberExpression'
       && expression.object && expression.object.type === 'Identifier'
       && expression.object.name === 'define'
@@ -107,27 +107,27 @@ function isDefineAmd(expression){
 }
 
 //{<isDefineStatement>}
-function containsDefineStatement(statement){
+function containsDefineStatement(statement : any){
   return statement && (
          (statement.type === 'BlockStatement' && first(statement.body, isDefineStatement))
       || isDefineStatement(statement));
 }
 
 //define(...)
-function isDefineStatement(statement){
+function isDefineStatement(statement : any){
   return statement && statement.type === 'ExpressionStatement'
       && statement.expression
       && isDefineNodeWithArgs(statement.expression);
 }
 
 //define(...)
-function isDefineNodeWithArgs (node) {
+function isDefineNodeWithArgs (node : any) {
   return node && node.type === 'CallExpression'
       && node.callee && node.callee.type === 'Identifier'
       && node.callee.name === 'define' && node;
 }
 
-function first(array, func){
+function first<T, U>(array : T[], func : (e : T) => (U | undefined)){
   for(const entry of array){
     const result = func(entry);
     if(result) return result;

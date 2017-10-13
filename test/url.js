@@ -1,5 +1,5 @@
 const fs = require('fs');
-const optimize = require('../index.js');
+const optimize = require('../dest/index.js').default;
 const assert = require('assert');
 const loadFileFromFakeNet = require('./utils/loadFileFromFakeNet');
 const _ = require('lodash');
