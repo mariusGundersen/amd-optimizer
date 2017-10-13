@@ -26,6 +26,12 @@ export interface Options {
 
 export type LoadFile = (Dependency : Dependency) => File
 
+export interface Result {
+  readonly name : string,
+  readonly content : string,
+  readonly map : {}
+}
+
 export default function(config : Config, options : Options){
 
   config = config || {};
@@ -49,9 +55,6 @@ export default function(config : Config, options : Options){
       if('name' in file == false){
         throw new Error('File object must contain property name');
       }
-      if('relative' in file == false){
-        throw new Error('File object must contain property relative');
-      }
 
       const filename = slash(file.name);
       if(!modules.isMissing(filename)) return;
@@ -62,7 +65,7 @@ export default function(config : Config, options : Options){
       .map(function(module){
 
         if(!module.isModule){
-          modules.defineModule(filename, module.rootAstNode, [], file);
+          modules.defineModule(filename, module.rootAstNode, [], file.sourceMap);
           return [];
         }
 
@@ -78,7 +81,7 @@ export default function(config : Config, options : Options){
             : path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js'
         }));
 
-        modules.defineModule(moduleName, module.rootAstNode, dependencies.map(dep => dep.name), file);
+        modules.defineModule(moduleName, module.rootAstNode, dependencies.map(dep => dep.name), file.sourceMap);
         return dependencies;
       })
       .reduce(flatmap)
@@ -99,15 +102,17 @@ export default function(config : Config, options : Options){
     }
   };
 
-  function optimize(){
+  function optimize() : Result[] {
     return modules.leafToRoot().map(function(module){
-      const code = print(module.source, module.name, module.file.sourceMap);
+      const code = print(module.source, module.name, module.sourceMap);
+      console.log(code.map);
       return {
         content: code.code,
-        map: code.map,
-        name: slash(module.name),
-        source: module.file.source,
-        file: module.file
+        map: {
+          ...code.map,
+          sourcesContent: module.source
+        },
+        name: slash(module.name)
       };
     });
   }

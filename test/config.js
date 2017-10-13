@@ -3,7 +3,7 @@ const optimize = require('../dest/index.js').default;
 const assert = require('assert');
 const loadFile = require('./utils/loadFile');
 
-describe("require config", function(){
+describe.only("require config", function(){
 
   const cwd = __dirname;
   const base = cwd + '/config/src';

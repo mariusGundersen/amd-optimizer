@@ -4,10 +4,11 @@ import * as slash from 'slash';
 import { File } from './types';
 
 export default function parse(file : File){
+  console.log('parse', file.name);
   return recast.parse(
     stripBOM(file.contents),
     {
-      sourceFileName: slash(file.relative)
+      sourceFileName: slash(file.name)
     }
   );
 };

@@ -2,15 +2,13 @@ export interface Module {
     readonly name : string,
     readonly source : {}[],
     readonly dependencies : string[],
-    readonly file : File
+    readonly sourceMap? : {}
 }
 
 export interface File {
     readonly name : string,
     readonly contents : string,
-    readonly relative : string,
-    readonly source : string,
-    readonly sourceMap : {}
+    readonly sourceMap? : {}
 }
 
 export interface Dependency {

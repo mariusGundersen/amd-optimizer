@@ -5,7 +5,7 @@ class ModuleTree {
     constructor() {
         this.modules = new Map();
     }
-    defineModule(name, source, dependencies, file) {
+    defineModule(name, source, dependencies, sourceMap) {
         const module = this.modules.get(name);
         if (module) {
             module.source.push(source);
@@ -15,7 +15,7 @@ class ModuleTree {
                 name,
                 source: [source],
                 dependencies,
-                file
+                sourceMap
             });
         }
     }

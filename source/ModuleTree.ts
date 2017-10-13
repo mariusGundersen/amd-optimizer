@@ -7,7 +7,7 @@ export default class ModuleTree {
     this.modules = new Map<string, Module>();
   }
 
-  defineModule(name : string, source : {}, dependencies : string[], file : File){
+  defineModule(name : string, source : {}, dependencies : string[], sourceMap? : {}){
     const module = this.modules.get(name);
     if(module){
       module.source.push(source);
@@ -16,7 +16,7 @@ export default class ModuleTree {
         name,
         source: [source],
         dependencies,
-        file
+        sourceMap
       });
     }
   }

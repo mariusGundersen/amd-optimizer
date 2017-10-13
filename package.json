@@ -5,7 +5,8 @@
   "main": "dest/index.js",
   "scripts": {
     "test": "mocha",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "watch": "npm run tsc -- -w & npm run test -- -w"
   },
   "author": "Marius Gundersen",
   "license": "MIT",

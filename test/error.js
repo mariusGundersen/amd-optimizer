@@ -27,20 +27,12 @@ describe("handle error", function(){
     assert.throws(() => optimizer.addFile({contents: 'blabla'}));
   });
 
-  it("should throw an error when the file is missing relative", function(){
-    const optimizer = optimize({
-      baseUrl: '.'
-    });
-
-    assert.throws(() => optimizer.addFile({contents: 'blabla', name: 'blabla'}));
-  });
-
   it("should throw an error when loadFile rejects", async function(){
     const optimizer = optimize({
       baseUrl: '.'
     });
 
-    optimizer.addFile({contents: 'define(["file"], function(){})', name: 'dummy', relative: 'dummy.js'});
+    optimizer.addFile({contents: 'define(["file"], function(){})', name: 'dummy'});
 
     try{
       const result = await optimizer.done(() => Promise.reject(new Error('oh noes')));
