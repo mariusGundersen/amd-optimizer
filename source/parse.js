@@ -2,11 +2,11 @@ const recast = require('recast');
 const stripBOM = require('strip-bom');
 const slash = require('slash');
 
-module.exports = function(file){
+module.exports = function(contents, name){
   return recast.parse(
-    stripBOM(file.contents),
+    stripBOM(contents),
     {
-      sourceFileName: slash(file.relative)
+      sourceFileName: slash(name)
     }
   );
 };

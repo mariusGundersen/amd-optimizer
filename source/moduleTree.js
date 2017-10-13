@@ -5,12 +5,12 @@ module.exports = class ModuleTree {
     this.modules = new Map();
   }
 
-  defineModule(name, source, dependencies, file){
+  defineModule(name, source, dependencies, sourceMap){
     this.modules.set(name, {
-      name: name,
+      name,
       source: this.modules.has(name) ? this.modules.get(name).source.concat([source]) : [source],
-      dependencies: dependencies,
-      file: file
+      dependencies,
+      sourceMap
     });
   }
 

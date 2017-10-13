@@ -35,20 +35,17 @@ module.exports = function(config, options){
       if('name' in file == false){
         throw new Error('File object must contain property name');
       }
-      if('relative' in file == false){
-        throw new Error('File object must contain property relative');
-      }
 
       const filename = slash(file.name);
       if(!modules.isMissing(filename)) return;
 
       pendingModules.remove(filename);
 
-      const dependencies = locateModules(parse(file), options.umd)
+      const dependencies = locateModules(parse(file.contents, file.name), options.umd)
       .map(function(module){
 
         if(!module.isModule){
-          modules.defineModule(filename, module.rootAstNode, [], file);
+          modules.defineModule(filename, module.rootAstNode, [], file.sourceMap);
           return [];
         }
 
@@ -64,7 +61,7 @@ module.exports = function(config, options){
             : path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js'
         }));
 
-        modules.defineModule(moduleName, module.rootAstNode, dependencies.map(dep => dep.name), file);
+        modules.defineModule(moduleName, module.rootAstNode, dependencies.map(dep => dep.name), file.sourceMap);
         return dependencies;
       })
       .reduce(flatmap)
@@ -87,12 +84,12 @@ module.exports = function(config, options){
 
   function optimize(){
     return modules.leafToRoot().map(function(module){
-      const code = print(module.source, module.name, module.file.sourceMap);
+      const code = print(module.source, module.name, module.sourceMap);
       return {
         content: code.code,
         map: code.map,
         name: slash(module.name),
-        source: module.file.source,
+        source: module.source,
         file: module.file
       };
     });
