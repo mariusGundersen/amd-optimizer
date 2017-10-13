@@ -11,12 +11,9 @@ const requirejs = require('requirejs');
 const EventEmitter = require('events').EventEmitter;
 const slash = require('slash');
 const _ = require('lodash');
+const createPluginRunner = require('./source/plugin');
 
-module.exports = function(config, options){
-
-  config = config || {};
-  options = options || {};
-
+module.exports = function(config = {}, options = {}){
   const toExclude = getExclude(config, options);
 
   const context = requirejs(config);
@@ -25,7 +22,7 @@ module.exports = function(config, options){
 
   const pendingModules = new MissingModules();
 
-  const onDone = null;
+  const plugin = createPluginRunner(options.plugins);
 
   return {
     addFile: function(file){
@@ -46,6 +43,7 @@ module.exports = function(config, options){
 
       const dependencies = locateModules(parse(file), options.umd)
       .map(function(module){
+        console.log(file.name, module);
 
         if(!module.isModule){
           modules.defineModule(filename, module.rootAstNode, [], file);
@@ -58,10 +56,7 @@ module.exports = function(config, options){
         .filter(name => !excluded(toExclude, name))
         .map(name => ({
           name,
-          requiredBy: moduleName,
-          path: hasProtocol(config.baseUrl)
-            ? url.resolve(config.baseUrl, context.toUrl(name)) + '.js'
-            : path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name))) + '.js'
+          requiredBy: moduleName
         }));
 
         modules.defineModule(moduleName, module.rootAstNode, dependencies.map(dep => dep.name), file);
@@ -74,9 +69,17 @@ module.exports = function(config, options){
       pendingModules.add(dependencies);
     },
     done: async function(loadFile){
+
+      const loadModule = ({name, requiredBy, path}) => loadFile({
+        name,
+        requiredBy,
+        path: toPath(path || name + '.js')
+      });
+
       while(!pendingModules.isEmpty()){
-        const files = await Promise.all(pendingModules.map(m => loadFile(m)));
+        const files = await Promise.all(pendingModules.map(m => plugin(m, loadModule)));
         for(const file of files){
+          console.log(file.contents.toString());
           this.addFile(file);
         }
       }
@@ -86,7 +89,9 @@ module.exports = function(config, options){
   };
 
   function optimize(){
+    console.log(modules.modules)
     return modules.leafToRoot().map(function(module){
+      console.log('module', module);
       const code = print(module.source, module.name, module.file.sourceMap);
       return {
         content: code.code,
@@ -98,12 +103,17 @@ module.exports = function(config, options){
     });
   }
 
-  // match to "http://", "https://", etc...
-  function hasProtocol(targetUrl){
-    return /^[a-z]+:\/\//.test(targetUrl);
+  function toPath(name){
+    return hasProtocol(config.baseUrl)
+    ? url.resolve(config.baseUrl, context.toUrl(name))
+    : path.join(config.baseUrl, path.relative(config.baseUrl, context.toUrl(name)))
   }
-
 };
+
+// match to "http://", "https://", etc...
+function hasProtocol(targetUrl){
+  return /^[a-z]+:\/\//.test(targetUrl);
+}
 
 function excluded(exclude, name){
   const path = name.split('/');
