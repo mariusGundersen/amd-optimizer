@@ -1,10 +1,10 @@
 var toposort = require('toposort');
 
 module.exports = function(){
-  
+
   var modules = Object.create(null);
-  
-  return {    
+
+  return {
     defineModule: function(name, source, dependencies, file){
       modules[name] = {
         name: name,
@@ -13,28 +13,28 @@ module.exports = function(){
         file: file
       };
     },
-    
+
     has: function(name){
       return name in modules;
     },
-    
+
     isMissing: function(name){
       return !this.has(name);
     },
-    
+
     leafToRoot: function(){
       var edges = [];
       var nodes = [];
-      
-      for(var name in modules){
+
+      Object.keys(modules).sort(byName).forEach(function(name){
         if(modules[name].dependencies.length > 0){
           edges = edges.concat(modules[name].dependencies.map(function(dep){
             return [name, dep];
           }));
         }
         nodes.push(name);
-      }
-      
+      });
+
       return toposort.array(nodes, edges)
       .reverse()
       .filter(function(name){
@@ -44,5 +44,9 @@ module.exports = function(){
       });
     }
   };
-  
+
 };
+
+function byName(a, b){
+  return a < b ? -1 : a > b ? 1 : 0;
+}
