@@ -45,7 +45,7 @@ describe("Load through HTTP", function(){
 
   output.forEach(function(name){
     it(name + " should have a named module", function(){
-      assert.equal(_.where(output, {name:name})[0].content, fs.readFileSync(cwd + '/basic/namedModules/' + name + '.js').toString('utf8'));
+      assert.equal(_.filter(output, {name:name})[0].content, fs.readFileSync(cwd + '/basic/namedModules/' + name + '.js').toString('utf8'));
     });
   });
 });

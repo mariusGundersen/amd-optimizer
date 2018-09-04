@@ -49,7 +49,7 @@ describe("Naming umd modules", function(){
 
   output.forEach(function(name){
     it(name + " should have a named module", function(){
-      assert.equal(_.where(output, {name:name})[0].content, fs.readFileSync(cwd + '/umd/namedModules/' + name + '.js').toString('utf8'));
+      assert.equal(_.filter(output, {name:name})[0].content, fs.readFileSync(cwd + '/umd/namedModules/' + name + '.js').toString('utf8'));
     });
   });
 });
