@@ -1,6 +1,6 @@
 {
   "name": "amd-optimizer",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,16 +13,16 @@
     "url": "git://github.com/mariusgundersen/amd-optimizer"
   },
   "dependencies": {
-    "recast": "~0.10.33",
-    "requirejs": "^2.1.20",
-    "toposort": "^0.2.12",
+    "recast": "~0.15.3",
+    "requirejs": "^2.3.6",
+    "toposort": "^2.0.2",
     "ast-traverse": "~0.1.1",
-    "strip-bom": "^2.0.0",
-    "vinyl": "~1.0.0",
-    "slash": "^1.0.0",
-    "lodash": "^3.10.1"
+    "strip-bom": "^3.0.0",
+    "vinyl": "~2.2.0",
+    "slash": "^2.0.0",
+    "lodash": "^4.17.10"
   },
   "devDependencies": {
-    "mocha": "^2.3.3"
+    "mocha": "^5.2.0"
   }
 }

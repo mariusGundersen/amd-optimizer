@@ -21,7 +21,7 @@ module.exports = function(){
       return q.length == 0;
     },
     has: function(name){
-      return _.contains(q, name);
+      return _.includes(q, name);
     },
     isMissing: function(name){
       return !this.has(name);
